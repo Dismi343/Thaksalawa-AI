@@ -2,7 +2,7 @@ import  login from '../assets/login.png'
 import Register from '../assets/Register.png'
 import {useState} from "react";
 import { useNavigate } from "react-router-dom";
-
+import axios from 'axios';
 
 function LoginPage(){
 
@@ -17,10 +17,22 @@ function LoginPage(){
         username: '',
         email: '',
         password: '',
-        confirmPassword: '',
-        remember: false,
-        usertype: ''
+        role: '',
+        remember: false
+
     });
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [passwordmatch, setPasswordmatch] = useState(true);
+
+    const validatePassword = (pw) => {
+        if (!pw || pw.length < 8) return 'Password must be at least 8 characters.';
+        if (!/[A-Z]/.test(pw)) return 'Password must include an uppercase letter.';
+        if (!/[a-z]/.test(pw)) return 'Password must include a lowercase letter.';
+        if (!/[0-9]/.test(pw)) return 'Password must include a number.';
+        if (!/[!@#\$%\^&\*\(\)\-_\+=\[\]\{\};:"\\|,.<>\/\?]/.test(pw)) return 'Password must include a special character.';
+        return '';
+    };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -28,13 +40,56 @@ function LoginPage(){
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
+
+        if (name === 'password') setPasswordError('');
+
     };
 
-    const handleSubmit=()=>{
-        console.log(isLogin ? 'Login with credentials:' :' Register with details:', formData);
-        {!isLogin ? alert(`${isLogin ? 'Login' : 'Sign up'} submitted! Check console for data.`):null}
+    const handleSubmit= async()=> {
+        console.log(isLogin ? 'Login with credentials:' : ' Register with details:', formData);
 
-    }
+        if (!isLogin) {
+            const pwError = validatePassword(formData.password);
+            if (pwError) {
+                setPasswordError(pwError);
+                return;
+            }
+        }
+
+            if (!isLogin) {
+                if (formData.password !== confirmPassword) {
+                    setPasswordmatch(false);
+                    return;
+                }
+                try {
+                    const res = await axios.post('http://127.0.0.1:8000/users/register',
+                        {
+                            username: formData.username,
+                            email: formData.email,
+                            password: formData.password,
+                            role: formData.role,
+                            remember: formData.remember
+                        },
+                        {
+                            headers: {"Content-Type": "application/json"}
+                        }
+                    )
+                    console.log(res.data);
+                    setFormData({
+                        username: '',
+                        email: '',
+                        password: '',
+                        role: '',
+                        remember: false
+                    });
+                    setConfirmPassword('');
+                } catch (e) {
+                    console.error("Registration error:", e);
+                    return null;
+                }
+            }
+
+        }
 
     return (
         <>
@@ -73,15 +128,15 @@ function LoginPage(){
                                         User Type
                                     </label>
                                     <select
-                                        id="usertype"
-                                        name="usertype"
-                                        value={formData.usertype}
+                                        id="role"
+                                        name="role"
+                                        value={formData.role}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-dark focus:border-transparent outline-none transition bg-white/50 text-gray-500"
                                     >
                                         <option value="" >Select user type</option>
-                                        <option value="Student">Student</option>
-                                        <option value="Teacher">Teacher</option>
+                                        <option value="Student" >Student</option>
+                                        <option value="Teacher" >Teacher</option>
                                     </select>
                                 </>
                             )}
@@ -98,7 +153,6 @@ function LoginPage(){
                                 className="w-full px-4 py-3  rounded-lg focus:ring-2 focus:ring-dark focus:border-transparent outline-none transition bg-white"
                                 placeholder="Enter your Username"
                             />
-
                             <label htmlFor="password" className="block text-sm font-medium text-light-green my-4">
                                 Password
                             </label>
@@ -111,6 +165,9 @@ function LoginPage(){
                                 className="w-full px-4 py-3  rounded-lg focus:ring-2 focus:ring-dark focus:border-transparent outline-none transition bg-white"
                                 placeholder="Enter your password"
                             />
+                            {passwordError && (
+                                <p className="text-sm text-red-500 mt-2">{passwordError}</p>
+                            )}
                             {!isLogin && (
                                 <>
                                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-light-green my-4">
@@ -120,11 +177,17 @@ function LoginPage(){
                                         type="password"
                                         id="confirmPassword"
                                         name="confirmPassword"
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
+                                        value={confirmPassword}
+                                        onChange={(e)=>setConfirmPassword(e.target.value)}
                                         className="w-full px-4 py-3  rounded-lg focus:ring-2 focus:ring-dark focus:border-transparent outline-none transition bg-white"
                                         placeholder="Enter your confrim password"
                                     />
+                                    {passwordError && (
+                                        <p className="text-sm text-red-500 mt-2">{passwordError}</p>
+                                    )}
+                                    {!passwordmatch && (
+                                        <p className="text-sm text-red-500 mt-2">Password does not match </p>
+                                    )}
                                 </>
                             )}
 
@@ -135,8 +198,8 @@ function LoginPage(){
                                         <input
                                             type="checkbox"
                                             name="remember"
-                                            // checked={formData.remember}
-                                            // onChange={handleChange}
+                                             checked={formData.remember}
+                                             onChange={handleChange}
                                             className="w-4 h-4 text-dark border-darker rounded focus:ring-dark outline-none"
                                         />
                                         <span className="ml-2 text-light-green font-semibold">Remember me</span>
@@ -164,4 +227,5 @@ function LoginPage(){
         </>
     );
 }
+
 export default LoginPage;
