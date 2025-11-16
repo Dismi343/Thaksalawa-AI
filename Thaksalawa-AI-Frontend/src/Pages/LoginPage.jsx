@@ -1,4 +1,4 @@
-import login from '../assets/Login.png'
+import  login from '../assets/login.png'
 import Register from '../assets/Register.png'
 import {useState} from "react";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,8 @@ function LoginPage(){
         email: '',
         password: '',
         confirmPassword: '',
-        remember: false
+        remember: false,
+        usertype: ''
     });
 
     const handleChange = (e) => {
@@ -31,30 +32,31 @@ function LoginPage(){
 
     const handleSubmit=()=>{
         console.log(isLogin ? 'Login with credentials:' :' Register with details:', formData);
-        alert(`${isLogin ? 'Login' : 'Sign up'} submitted! Check console for data.`);
+        {!isLogin ? alert(`${isLogin ? 'Login' : 'Sign up'} submitted! Check console for data.`):null}
+
     }
 
     return (
         <>
-        <div className="min-h-screen bg-primary w-full flex flex-col md:flex-row">
-            <div className="md:w-1/2 w-full md:min-h-screen h-64 overflow-hidden p-6">
-                {isLogin ? <img src={login} alt="login" className="w-full h-full object-cover rounded-3xl" /> :<img src={Register} alt="login" className="w-full h-full object-cover rounded-3xl" /> }
+        <div className="min-h-screen bg-background w-full flex flex-col md:flex-row">
+            <div className="md:w-1/2 w-full h-sceen overflow-hidden ">
+                {isLogin ? <img src={login} alt="login" className="w-full h-full object-cover" /> :<img src={Register} alt="register" className="w-full h-full object-cover " /> }
 
             </div>
-            <div className="md:w-1/2 w-full md:min-h-screen flex-1 overflow-auto">
+            <div className="md:w-1/2 w-full h-full flex-1 overflow-auto">
                 <div className="flex flex-col justify-start md:justify-center items-start md:items-center p-6 md:p-10 max-w-2xl mx-auto">
-                    <h1 className="text-3xl md:text-[50px] font-bold text-darker">Thaksalawa AI</h1>
-                    <div className="rounded-xl w-80 h-15 mt-10 shadow-lg bg-darker/50 flex p-3 ">
-                        <button className={`h-full  w-1/2 rounded-xl text-white ${isLogin?'bg-darker':'bg-none'} `} onClick={()=>setIsLogin(true)}>Login</button>
-                        <button className={`text-white w-1/2 h-full  rounded-xl ${isLogin?'bg-none':'bg-darker'} `} onClick={()=>setIsLogin(false)} >Register</button>
+                    <h1 className="text-3xl md:text-[50px] font-bold text-primary">Thaksalawa AI</h1>
+                    <div className={`rounded-xl w-80 h-15 mt-10 shadow-xl flex p-3 ${isLogin?'bg-gradient-to-r from-[#1E3231] to-[#458885]':'bg-gradient-to-r from-[#458885] to-[#1E3231]'} `}>
+                        <button className={`h-full  w-1/2 rounded-xl text-white  ${isLogin?'bg-darker shadow-sm':'bg-none'} `} onClick={()=>setIsLogin(true)}>Login</button>
+                        <button className={`text-white w-1/2 h-full  rounded-xl ${isLogin?'bg-none':'bg-darker shadow-sm'} `} onClick={()=>setIsLogin(false)} >Register</button>
                     </div>
-                    <div className='mt-10 text-lg text-dark'>Learn easy. Learn smart.</div>
+                    <div className='mt-8 text-2xl font-semibold text-light-green'>Learn easy. Learn smart.</div>
 
                     <div className=" w-full mt-10 ">
                         <div className="flex flex-col">
                             {!isLogin &&(
                                 <>
-                                    <label htmlFor="email" className="block text-sm font-medium text-darker mb-4">
+                                    <label htmlFor="email" className="block text-sm font-medium text-light-green mb-4">
                                         Email Address
                                     </label>
                                     <input
@@ -63,13 +65,28 @@ function LoginPage(){
                                         name="email"
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3  rounded-lg focus:ring-2 focus:ring-dark focus:border-transparent outline-none transition bg-white"
+                                        className="w-full px-4 py-3  rounded-lg focus:ring-2 focus:ring-dark focus:border-transparent outline-none transition bg-white/50"
                                         placeholder="Enter your email"
                                     />
+
+                                    <label htmlFor="usertype" className="block text-sm font-medium text-light-green my-4">
+                                        User Type
+                                    </label>
+                                    <select
+                                        id="usertype"
+                                        name="usertype"
+                                        value={formData.usertype}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-dark focus:border-transparent outline-none transition bg-white/50 text-gray-500"
+                                    >
+                                        <option value="" >Select user type</option>
+                                        <option value="Student">Student</option>
+                                        <option value="Teacher">Teacher</option>
+                                    </select>
                                 </>
                             )}
 
-                            <label htmlFor="username" className="block text-sm font-medium text-darker my-4">
+                            <label htmlFor="username" className="block text-sm font-medium text-light-green my-4">
                                Username
                             </label>
                             <input
@@ -82,7 +99,7 @@ function LoginPage(){
                                 placeholder="Enter your Username"
                             />
 
-                            <label htmlFor="password" className="block text-sm font-medium text-darker my-4">
+                            <label htmlFor="password" className="block text-sm font-medium text-light-green my-4">
                                 Password
                             </label>
                             <input
@@ -96,7 +113,7 @@ function LoginPage(){
                             />
                             {!isLogin && (
                                 <>
-                                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-darker my-4">
+                                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-light-green my-4">
                                         Confirm Password
                                     </label>
                                     <input
@@ -122,19 +139,18 @@ function LoginPage(){
                                             // onChange={handleChange}
                                             className="w-4 h-4 text-dark border-darker rounded focus:ring-dark outline-none"
                                         />
-                                        <span className="ml-2 text-dark">Remember me</span>
+                                        <span className="ml-2 text-light-green font-semibold">Remember me</span>
                                       </label>
                                 </span>
                                     <span>
-                                    <a className="hover:cursor-pointer text-dark" onClick={handleForgotPassword}>Forgot Password?</a>
+                                    <a className="hover:cursor-pointer text-light-green font-semibold" onClick={handleForgotPassword}>Forgot Password?</a>
                                 </span>
 
                                 </div>
                             )}
 
                             <div className="  w-full h-10 flex justify-end mt-10 ">
-
-                                <button className="bg-light-yellow px-8 py-2 rounded-lg text-darker hover:cursor-pointer shadow-lg" onClick={handleSubmit}>
+                                <button className="bg-gradient-to-r from-gradient-start to-gradient-end px-8 py-2 rounded-lg text-white font-semibold hover:cursor-pointer shadow-lg" onClick={handleSubmit}>
                                     {isLogin ?'Login':'Register'}
                                 </button>
                             </div>
