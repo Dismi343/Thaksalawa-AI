@@ -48,15 +48,36 @@ function LoginPage(){
     const handleSubmit= async()=> {
         console.log(isLogin ? 'Login with credentials:' : ' Register with details:', formData);
 
+        if(isLogin){
+            try{
+                const res = await axios.post('http://127.0.0.1:8000/auth/login',{
+                    username: formData.username,
+                    password: formData.password
+                },
+                    {
+                        headers: {"Content-Type": "application/json"}
+                    }
+                    )
+                console.log(res.data);
+                setFormData({
+                    username: '',
+                    email: '',
+                    password: '',
+                    role: '',
+                    remember: false
+                });
+            }catch(e){
+                console.error("Login error:", e);
+                return null;
+            }
+        }
+
         if (!isLogin) {
             const pwError = validatePassword(formData.password);
             if (pwError) {
                 setPasswordError(pwError);
                 return;
             }
-        }
-
-            if (!isLogin) {
                 if (formData.password !== confirmPassword) {
                     setPasswordmatch(false);
                     return;

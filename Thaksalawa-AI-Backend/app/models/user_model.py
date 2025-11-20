@@ -12,7 +12,3 @@ class User(BaseModel):
     password: str = Field(..., min_length=6)
     role:  RoleEnum = RoleEnum.student
     remember: bool = False
-
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str = Field(..., min_length=6)

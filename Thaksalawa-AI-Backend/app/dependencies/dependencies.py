@@ -1,5 +1,5 @@
 from fastapi import HTTPException, Depends
-from auth import get_current_user
+from app.auth.auth_config import get_current_user
 
 def teacher_only(current_user = Depends(get_current_user)):
     if current_user["role"] != "Teacher":
