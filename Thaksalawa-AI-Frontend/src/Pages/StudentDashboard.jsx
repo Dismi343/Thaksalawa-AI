@@ -1,0 +1,107 @@
+import React, { useState, useEffect, useRef } from 'react';
+import Sidebar from '../Components/Dashboard/Sidebar';
+import HomeModule from '../Components/Dashboard/HomeModule';
+import QuizPage from "./QuizPage.jsx";
+import ChatModule from './ChatModule.jsx';
+import { 
+  LayoutGrid, 
+  MessageSquareText, 
+  GraduationCap, 
+  PieChart, 
+  Code, 
+  Settings, 
+  LogOut, 
+  Search,
+  Bell,
+  Clock,
+  ArrowRight,
+  MoreVertical,
+  Send,
+  Circle,
+  Play,
+  Leaf,
+  ChevronRight,
+  Menu,
+  X
+} from 'lucide-react';
+
+export default function StudentDashboard() {
+  const [activePage, setActivePage] = useState('dashboard');
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  // Render content based on internal state
+  const renderContent = () => {
+    switch(activePage) {
+      case 'dashboard': return <HomeModule onNavigate={setActivePage} />;
+      case 'chat': return <ChatModule />;
+      case 'quiz': return <QuizPage onNavigate={setActivePage}/>;
+      case 'code': return <CodeModule />;
+      case 'analytics': return <div className="p-8 text-center text-slate-500">Analytics Component Here</div>;
+      default: return <HomeModule onNavigate={setActivePage} />;
+    }
+  };
+
+  return (
+    <div className="flex h-screen bg-[#f4f7f6] font-sans text-slate-900">
+      
+      {/* Sidebar Component */}
+      <Sidebar 
+        activePage={activePage} 
+        onNavigate={setActivePage} 
+        isMobileOpen={isMobileOpen}
+        setIsMobileOpen={setIsMobileOpen}
+      />
+
+      {/* Main Layout */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        
+        {/* Top Header */}
+        <header className="h-16 md:h-20 px-4 md:px-8 flex items-center justify-between bg-[#f4f7f6] flex-shrink-0 z-20">
+          
+          <div className="flex items-center gap-3">
+            <button 
+                onClick={() => setIsMobileOpen(true)}
+                className="lg:hidden p-2 text-slate-600 hover:bg-slate-200 rounded-lg"
+            >
+                <Menu size={24} />
+            </button>
+
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-400">
+                <span className="cursor-pointer hover:text-slate-600 hidden md:block" onClick={() => setActivePage('dashboard')}>Dashboard</span>
+                {activePage !== 'dashboard' && (
+                <>
+                    <ChevronRight size={14} className="hidden md:block" />
+                    <span className="text-[#1a4d2e] capitalize">{activePage}</span>
+                </>
+                )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 md:gap-6">
+            <div className="hidden md:flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-slate-200 focus-within:border-[#1a4d2e] transition-colors shadow-sm w-48 lg:w-64">
+              <Search size={18} className="text-slate-400" />
+              <input type="text" placeholder="Search..." className="bg-transparent outline-none text-sm w-full placeholder:text-slate-400" />
+            </div>
+
+            <button className="relative p-2 rounded-full hover:bg-white transition-colors">
+              <Bell size={20} className="text-slate-600" />
+              <span className="absolute top-1.5 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+            </button>
+
+            <div className="flex items-center gap-3 cursor-pointer pl-4 border-l border-slate-200">
+              <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-[#1a4d2e] to-green-600 border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-sm">
+                S
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar">
+          {renderContent()}
+        </div>
+
+      </main>
+    </div>
+  );
+}
