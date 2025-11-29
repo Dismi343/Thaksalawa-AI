@@ -47,14 +47,13 @@ ENGINE = InnoDB;
 -- Table `thaksalawa-ai-db`.`Student`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`Student` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `student_id` INT NOT NULL AUTO_INCREMENT,
   `st_name` VARCHAR(255) NOT NULL,
-  `role` VARCHAR(25) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
   `email` VARCHAR(100) NOT NULL,
   `teacher_teacher_id` INT NULL,
   `user_role_role_id` INT NOT NULL,
-  PRIMARY KEY (`id`, `teacher_teacher_id`, `user_role_role_id`),
+  PRIMARY KEY (`student_id`, `user_role_role_id`),
   INDEX `fk_Student_teacher1_idx` (`teacher_teacher_id` ASC) VISIBLE,
   INDEX `fk_Student_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
   CONSTRAINT `fk_Student_teacher1`
@@ -74,14 +73,14 @@ ENGINE = InnoDB;
 -- Table `thaksalawa-ai-db`.`Analysis`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`Analysis` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `analysis_id` INT NOT NULL AUTO_INCREMENT,
   `qId` INT NOT NULL,
   `Student_id` INT NOT NULL,
-  PRIMARY KEY (`id`, `Student_id`),
+  PRIMARY KEY (`analysis_id`, `Student_id`),
   INDEX `fk_Analysis_Student1_idx` (`Student_id` ASC) VISIBLE,
   CONSTRAINT `fk_Analysis_Student1`
     FOREIGN KEY (`Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Student` (`id`)
+    REFERENCES `thaksalawa-ai-db`.`Student` (`student_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -144,7 +143,7 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`chat` (
   INDEX `fk_chat_Student1_idx` (`Student_id` ASC) VISIBLE,
   CONSTRAINT `fk_chat_Student1`
     FOREIGN KEY (`Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Student` (`id`)
+    REFERENCES `thaksalawa-ai-db`.`Student` (`student_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -183,7 +182,7 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`quiz` (
   `Analysis_Student_id` INT NOT NULL,
   `Student_id` INT NOT NULL,
   `teacher_teacher_id` INT NULL,
-  PRIMARY KEY (`quiz_id`, `Lesson_lesson_id`, `Analysis_id`, `Analysis_Student_id`, `Student_id`, `teacher_teacher_id`),
+  PRIMARY KEY (`quiz_id`),
   INDEX `fk_quiz_Lesson1_idx` (`Lesson_lesson_id` ASC) VISIBLE,
   INDEX `fk_quiz_Analysis1_idx` (`Analysis_id` ASC, `Analysis_Student_id` ASC) VISIBLE,
   INDEX `fk_quiz_Student1_idx` (`Student_id` ASC) VISIBLE,
@@ -195,12 +194,12 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`quiz` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_quiz_Analysis1`
     FOREIGN KEY (`Analysis_id` , `Analysis_Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Analysis` (`id` , `Student_id`)
+    REFERENCES `thaksalawa-ai-db`.`Analysis` (`analysis_id` , `Student_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_quiz_Student1`
     FOREIGN KEY (`Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Student` (`id`)
+    REFERENCES `thaksalawa-ai-db`.`Student` (`student_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_quiz_teacher1`
@@ -222,7 +221,7 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`login_logs` (
   INDEX `fk_login_logs_Student1_idx` (`Student_id` ASC) VISIBLE,
   CONSTRAINT `fk_login_logs_Student1`
     FOREIGN KEY (`Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Student` (`id`)
+    REFERENCES `thaksalawa-ai-db`.`Student` (`student_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -267,7 +266,7 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`student_answer` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_student_answer_Student1`
     FOREIGN KEY (`Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Student` (`id`)
+    REFERENCES `thaksalawa-ai-db`.`Student` (`student_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -314,6 +313,7 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`admin` (
   `admin_id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `email` VARCHAR(100) NOT NULL,
+  `password` VARCHAR(255) NOT NULL,
   `user_role_role_id` INT NOT NULL,
   PRIMARY KEY (`admin_id`, `user_role_role_id`),
   INDEX `fk_admin_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
