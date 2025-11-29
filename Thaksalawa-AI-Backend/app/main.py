@@ -1,10 +1,10 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.params import Depends
 from app.exceptions.exceptions import http_exception_handler
-from app.views.user_view import router as user_router
-from app.views.auth_view import router as auth_router
 from fastapi.middleware.cors import CORSMiddleware
-from app.dependencies.dependencies import teacher_only
+from app.views.user_role_view import router as user_role_router
+from app.views.student_view import router as student_router
+from app.views.admin_view import router as admin_router
+from app.views.teacher_view import router as teacher_router
 
 app = FastAPI()
 
@@ -19,10 +19,7 @@ app.add_middleware(
 
 app.add_exception_handler(HTTPException, http_exception_handler)
 
-app.include_router(user_router)
-app.include_router(auth_router)
-
-
-@app.get("/teacher/dashboard")
-def teacher_dashboard(user=Depends(teacher_only)):
-    return {"message": f"Welcome teacher: {user['username']}"}
+app.include_router(user_role_router)
+app.include_router(student_router)
+app.include_router(admin_router)
+app.include_router(teacher_router)
