@@ -15,6 +15,35 @@ CREATE SCHEMA IF NOT EXISTS `thaksalawa-ai-db` DEFAULT CHARACTER SET utf8 ;
 USE `thaksalawa-ai-db` ;
 
 -- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`user_role`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`user_role` (
+  `role_id` INT NOT NULL AUTO_INCREMENT,
+  `role_name` ENUM('student', 'teacher', 'admin') NOT NULL,
+  PRIMARY KEY (`role_id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`teacher`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`teacher` (
+  `teacher_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `password` VARCHAR(255) NOT NULL,
+  `user_role_role_id` INT NOT NULL,
+  PRIMARY KEY (`teacher_id`, `user_role_role_id`),
+  INDEX `fk_teacher_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
+  CONSTRAINT `fk_teacher_user_role1`
+    FOREIGN KEY (`user_role_role_id`)
+    REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `thaksalawa-ai-db`.`Student`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`Student` (
@@ -23,7 +52,21 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`Student` (
   `role` VARCHAR(25) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
   `email` VARCHAR(100) NOT NULL,
-  PRIMARY KEY (`id`))
+  `teacher_teacher_id` INT NULL,
+  `user_role_role_id` INT NOT NULL,
+  PRIMARY KEY (`id`, `teacher_teacher_id`, `user_role_role_id`),
+  INDEX `fk_Student_teacher1_idx` (`teacher_teacher_id` ASC) VISIBLE,
+  INDEX `fk_Student_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
+  CONSTRAINT `fk_Student_teacher1`
+    FOREIGN KEY (`teacher_teacher_id`)
+    REFERENCES `thaksalawa-ai-db`.`teacher` (`teacher_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Student_user_role1`
+    FOREIGN KEY (`user_role_role_id`)
+    REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -126,17 +169,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`teacher`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`teacher` (
-  `teacher_id` INT NOT NULL AUTO_INCREMENT,
-  `email` VARCHAR(55) NOT NULL,
-  `name` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`teacher_id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `thaksalawa-ai-db`.`quiz`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`quiz` (
@@ -150,7 +182,7 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`quiz` (
   `Analysis_id` INT NOT NULL,
   `Analysis_Student_id` INT NOT NULL,
   `Student_id` INT NOT NULL,
-  `teacher_teacher_id` INT NOT NULL,
+  `teacher_teacher_id` INT NULL,
   PRIMARY KEY (`quiz_id`, `Lesson_lesson_id`, `Analysis_id`, `Analysis_Student_id`, `Student_id`, `teacher_teacher_id`),
   INDEX `fk_quiz_Lesson1_idx` (`Lesson_lesson_id` ASC) VISIBLE,
   INDEX `fk_quiz_Analysis1_idx` (`Analysis_id` ASC, `Analysis_Student_id` ASC) VISIBLE,
@@ -270,6 +302,24 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`keywords` (
   CONSTRAINT `fk_keywords_model_answer1`
     FOREIGN KEY (`model_answer_model_answer_id`)
     REFERENCES `thaksalawa-ai-db`.`model_answer` (`model_answer_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`admin`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`admin` (
+  `admin_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `user_role_role_id` INT NOT NULL,
+  PRIMARY KEY (`admin_id`, `user_role_role_id`),
+  INDEX `fk_admin_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
+  CONSTRAINT `fk_admin_user_role1`
+    FOREIGN KEY (`user_role_role_id`)
+    REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
