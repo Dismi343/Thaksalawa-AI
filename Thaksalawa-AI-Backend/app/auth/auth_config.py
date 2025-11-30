@@ -5,7 +5,6 @@ from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
 import os
 from dotenv import load_dotenv
-from app.database import users_collection
 
 load_dotenv()
 
@@ -40,17 +39,17 @@ def create_access_token(data: dict):
 
 
 # Get current user from token
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+# def get_current_user(token: str = Depends(oauth2_scheme)):
+#     try:
+#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+#         username = payload.get("sub")
+#         if username is None:
+#             raise HTTPException(status_code=401, detail="Invalid token")
+#     except JWTError:
+#         raise HTTPException(status_code=401, detail="Invalid token")
 
-    user = users_collection.find_one({"username": username})
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    user["id"] = str(user["_id"])
-    return user
+#     user = users_collection.find_one({"username": username})
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     user["id"] = str(user["_id"])
+#     return user
