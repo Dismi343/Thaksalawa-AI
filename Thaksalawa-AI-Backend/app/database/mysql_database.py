@@ -15,6 +15,11 @@ engine = create_engine(URL_DATABASE)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+
+import app.models.pdf_model
+import app.models.subject_model
+import app.models.lesson_model
+
 def get_db():
     db=SessionLocal()
     try:
