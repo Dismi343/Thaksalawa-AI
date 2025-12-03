@@ -1,36 +1,70 @@
+# ========================
 # Python
+# ========================
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
-*.log
-
-# Virtual environments
-venv/
+*.pyc
+*.pdb
+*.egg-info/
+*.egg
+*.whl
+dist/
+build/
 env/
+venv/
 ENV/
 .venv/
 
-# Docker / OS
+# ========================
+# VSCode / IDEs
+# ========================
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# ========================
+# Logs
+# ========================
+*.log
+
+# ========================
+# NGINX
+# ========================
+# Ignore binaries, logs, html, temp folders
+nginx-1.29.3/**
+# Keep only configuration files
+!nginx-1.29.3/conf/nginx.conf
+
+# ========================
+# Docker
+# ========================
+# Images, containers, volumes
+docker-compose.override.yml
+*.dockerfile
+*.env
+**/Dockerfile
+**/docker-compose*.yml
+
+# ========================
+# Environment variables
+# ========================
+.env
+.env.*
+.venv/
+
+# ========================
+# Database / Local files
+# ========================
+*.sqlite3
+*.db
+*.bak
+
+# ========================
+# Misc
+# ========================
 *.DS_Store
 *.swp
 *.swo
-
-# Environment files
-.env
-.env.*
-
-# Python packaging
-*.egg-info/
-dist/
-build/
-
-# Jupyter notebooks checkpoints
-.ipynb_checkpoints/
-
-# Logs
-*.log
-
-# Thaksalawa AI specific
-Thaksalawa-AI-Backend/__pycache__/
-Thaksalawa-AI-AI-Service/__pycache__/
