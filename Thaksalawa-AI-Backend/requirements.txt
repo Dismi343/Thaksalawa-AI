@@ -5,5 +5,9 @@ passlib[bcrypt]
 python-jose
 pydantic
 pymongo
-sqlalchemy 
+sqlalchemy 3
 python-dotenv
+mysql-connector-python
+requests
+uvicorn
+

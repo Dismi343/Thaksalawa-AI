@@ -1,3 +1,4 @@
+
 # Python
 __pycache__/
 *.pyc
@@ -32,4 +33,15 @@ Thumbs.db
 node_modules/
 dist/
 build/
+
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+
+
+# -------------------------
+# Environment variables
+# -------------------------
+.env
 
