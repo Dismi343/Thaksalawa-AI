@@ -10,3 +10,5 @@ pymilvus
 pymupdf
 langchain-milvus
 langchain-openai
+openai
+python-dotenv
