@@ -1,0 +1,70 @@
+# ========================
+# Python
+# ========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+*.egg
+*.whl
+dist/
+build/
+env/
+venv/
+ENV/
+.venv/
+
+# ========================
+# VSCode / IDEs
+# ========================
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# ========================
+# Logs
+# ========================
+*.log
+
+# ========================
+# NGINX
+# ========================
+# Ignore binaries, logs, html, temp folders
+nginx-1.29.3/**
+# Keep only configuration files
+!nginx-1.29.3/conf/nginx.conf
+
+# ========================
+# Docker
+# ========================
+# Images, containers, volumes
+docker-compose.override.yml
+*.dockerfile
+*.env
+**/Dockerfile
+**/docker-compose*.yml
+
+# ========================
+# Environment variables
+# ========================
+.env
+.env.*
+.venv/
+
+# ========================
+# Database / Local files
+# ========================
+*.sqlite3
+*.db
+*.bak
+
+# ========================
+# Misc
+# ========================
+*.DS_Store
+*.swp
+*.swo
