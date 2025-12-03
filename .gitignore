@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Docker / OS
+*.DS_Store
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Thaksalawa AI specific
+Thaksalawa-AI-Backend/__pycache__/
+Thaksalawa-AI-AI-Service/__pycache__/

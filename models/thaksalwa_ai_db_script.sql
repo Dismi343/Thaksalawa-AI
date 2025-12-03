@@ -121,6 +121,8 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`Lesson` (
   `lesson_id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) NOT NULL,
+  `lesson_number` INT NOT NULL,
+  `content` LONGTEXT NOT NULL,
   `Subject_sub_id` INT NOT NULL,
   PRIMARY KEY (`lesson_id`, `Subject_sub_id`),
   INDEX `fk_Lesson_Subject1_idx` (`Subject_sub_id` ASC) VISIBLE,

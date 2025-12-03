@@ -1,7 +1,6 @@
 fastapi 
 uvicorn
 pypdf
-chromadb
 sentence-transformers
 transformers 
 accelerate

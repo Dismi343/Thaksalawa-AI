@@ -5,6 +5,7 @@ from app.views.user_role_view import router as user_role_router
 from app.views.student_view import router as student_router
 from app.views.admin_view import router as admin_router
 from app.views.teacher_view import router as teacher_router
+from app.views.login_view import router as login_router
 
 app = FastAPI()
 
@@ -23,3 +24,4 @@ app.include_router(user_role_router)
 app.include_router(student_router)
 app.include_router(admin_router)
 app.include_router(teacher_router)
+app.include_router(login_router)

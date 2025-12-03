@@ -16,3 +16,12 @@ class StudentModel(Base):
 
     teacher_teacher_id= Column(Integer, ForeignKey("teacher.teacher_id"))
     teacher = relationship(TeacherModel)
+
+    def to_dict(self):
+        return {
+            "id": self.student_id,
+            "email": self.email,
+            "name": self.st_name,
+            "role_id": self.user_role_role_id,
+            "type": "student"
+        }
