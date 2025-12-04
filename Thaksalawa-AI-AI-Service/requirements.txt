@@ -1,7 +1,6 @@
 fastapi 
 uvicorn
 pypdf
-chromadb
 sentence-transformers
 transformers 
 accelerate
@@ -10,3 +9,5 @@ pymilvus
 pymupdf
 langchain-milvus
 langchain-openai
+openai
+python-dotenv

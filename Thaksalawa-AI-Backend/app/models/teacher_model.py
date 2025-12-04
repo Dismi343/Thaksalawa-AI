@@ -12,3 +12,12 @@ class TeacherModel(Base):
 
     user_role_role_id = Column(Integer, ForeignKey("user_role.role_id"))
     role = relationship("UserRole")
+
+    def to_dict(self):
+        return {
+            "id": self.teacher_id,
+            "email": self.email,
+            "name": self.name,
+            "role_id": self.user_role_role_id,
+            "type": "teacher"
+        }

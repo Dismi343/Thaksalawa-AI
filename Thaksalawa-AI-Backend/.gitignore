@@ -1,0 +1,47 @@
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pym
+*.env
+*.venv
+venv/
+.env
+env/
+*.sqlite3
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# FastAPI / Uvicorn / Backend
+*.db
+*.sqlite
+
+# Node modules (if you have frontend)
+node_modules/
+dist/
+build/
+
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+
+
+# -------------------------
+# Environment variables
+# -------------------------
+.env
+

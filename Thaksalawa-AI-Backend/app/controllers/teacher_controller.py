@@ -2,6 +2,8 @@ from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from app.database.mysql_database import SessionLocal
 from app.models.teacher_model import TeacherModel
+from app.models.student_model import StudentModel
+from app.models.admin_model import AdminModel
 from app.models.user_role_model import UserRole
 from app.auth.auth_config import hash_password
 
@@ -10,7 +12,11 @@ def creat_teacher(payload):
     try:
         data=payload if isinstance(payload,dict) else payload.__dict__
         if session.query(TeacherModel).filter_by(email=data.get("email")).first():
-            raise HTTPException(status_code=400, detail="Email already exists")
+            raise HTTPException(status_code=400, detail="Email already exists in teacher records")
+        if session.query(StudentModel).filter_by(email=data.get("email")).first():
+            raise HTTPException(status_code=400, detail="Email already exists in student records")
+        if session.query(AdminModel).filter_by(email=data.get("email")).first():
+            raise HTTPException(status_code=400, detail="Email already exists in admin records")
         role_id = data.get("role_id")
         if role_id and not session.query(UserRole).filter_by(role_id=role_id).first():
             raise HTTPException(status_code=400, detail="Role not found")
