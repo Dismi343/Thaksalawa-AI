@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Sidebar from '../Components/Dashboard/Sidebar';
-import HomeModule from '../Components/Dashboard/HomeModule';
+import Sidebar from '../Components/StudentDashboard/Sidebar.jsx';
+import HomeModule from '../Components/StudentDashboard/HomeModule.jsx';
 import QuizPage from "./QuizPage.jsx";
 import ChatModule from './ChatModule.jsx';
-import { 
-  LayoutGrid, 
-  MessageSquareText, 
-  GraduationCap, 
-  PieChart, 
-  Code, 
-  Settings, 
-  LogOut, 
+import {
+  LayoutGrid,
+  MessageSquareText,
+  GraduationCap,
+  PieChart,
+  Code,
+  Settings,
+  LogOut,
   Search,
   Bell,
   Clock,
@@ -31,10 +31,10 @@ export default function StudentDashboard() {
 
   // Render content based on internal state
   const renderContent = () => {
-    switch(activePage) {
+    switch (activePage) {
       case 'dashboard': return <HomeModule onNavigate={setActivePage} />;
       case 'chat': return <ChatModule />;
-      case 'quiz': return <QuizPage onNavigate={setActivePage}/>;
+      case 'quiz': return <QuizPage onNavigate={setActivePage} />;
       case 'code': return <CodeModule />;
       case 'analytics': return <div className="p-8 text-center text-slate-500">Analytics Component Here</div>;
       default: return <HomeModule onNavigate={setActivePage} />;
@@ -43,37 +43,37 @@ export default function StudentDashboard() {
 
   return (
     <div className="flex h-screen bg-[#f4f7f6] font-sans text-slate-900">
-      
+
       {/* Sidebar Component */}
-      <Sidebar 
-        activePage={activePage} 
-        onNavigate={setActivePage} 
+      <Sidebar
+        activePage={activePage}
+        onNavigate={setActivePage}
         isMobileOpen={isMobileOpen}
         setIsMobileOpen={setIsMobileOpen}
       />
 
       {/* Main Layout */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        
+
         {/* Top Header */}
         <header className="h-16 md:h-20 px-4 md:px-8 flex items-center justify-between bg-[#f4f7f6] flex-shrink-0 z-20">
-          
+
           <div className="flex items-center gap-3">
-            <button 
-                onClick={() => setIsMobileOpen(true)}
-                className="lg:hidden p-2 text-slate-600 hover:bg-slate-200 rounded-lg"
+            <button
+              onClick={() => setIsMobileOpen(true)}
+              className="lg:hidden p-2 text-slate-600 hover:bg-slate-200 rounded-lg"
             >
-                <Menu size={24} />
+              <Menu size={24} />
             </button>
 
             <div className="flex items-center gap-2 text-sm font-medium text-slate-400">
-                <span className="cursor-pointer hover:text-slate-600 hidden md:block" onClick={() => setActivePage('dashboard')}>Dashboard</span>
-                {activePage !== 'dashboard' && (
+              <span className="cursor-pointer hover:text-slate-600 hidden md:block" onClick={() => setActivePage('dashboard')}>Dashboard</span>
+              {activePage !== 'dashboard' && (
                 <>
-                    <ChevronRight size={14} className="hidden md:block" />
-                    <span className="text-[#1a4d2e] capitalize">{activePage}</span>
+                  <ChevronRight size={14} className="hidden md:block" />
+                  <span className="text-[#1a4d2e] capitalize">{activePage}</span>
                 </>
-                )}
+              )}
             </div>
           </div>
 
