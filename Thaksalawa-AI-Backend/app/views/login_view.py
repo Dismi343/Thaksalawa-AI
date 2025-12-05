@@ -1,4 +1,4 @@
-from app.controllers.login_controller import login_user
+from app.controllers.login_controller import login_user,logout_user
 from fastapi import APIRouter,Depends
 from sqlalchemy.orm import Session
 from app.schema.login_schema import LoginRequest
@@ -17,3 +17,13 @@ def login_endpoint(request: LoginRequest, db:Session = Depends(get_db)):
 async def read_users_me(current_user : Annotated[dict,Depends(get_current_active_user)]):
     return current_user
 
+@router.post("/logout",response_model=dict)
+def logout_user_endpoint(current_user :int= Depends(get_current_active_user),db:Session = Depends(get_db)):
+    if isinstance(current_user, int):
+        user_id = current_user
+    else:
+        user_id = current_user['profile']['id']
+
+    user_type= current_user['role']
+    result = logout_user(user_id,user_type,db)
+    return  {"message": "Logout successful", "data": result}

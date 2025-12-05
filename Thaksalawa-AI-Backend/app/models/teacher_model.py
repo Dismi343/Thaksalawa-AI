@@ -11,7 +11,9 @@ class TeacherModel(Base):
     password = Column(String(255), nullable=False)
 
     user_role_role_id = Column(Integer, ForeignKey("user_role.role_id"))
-    role = relationship("UserRole")
+    role = relationship("UserRole",back_populates="teacher")
+
+    student=relationship("StudentModel",back_populates="teacher")
 
     def to_dict(self):
         return {
