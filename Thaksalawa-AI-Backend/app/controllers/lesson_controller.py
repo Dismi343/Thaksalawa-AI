@@ -7,7 +7,7 @@ from typing import List, Dict
 import requests
 import os
 
-AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://localhost:8001")
+AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://localhost:8001") #if not using nginx reverse proxy use this value
 
 
 def create_lesson(payload):
@@ -179,7 +179,7 @@ def process_and_store_lessons(pdf_filename: str, subject_id: int, lesson_count: 
     try:
         # Call AI service to divide lessons
         ai_response = requests.post(
-            f"{AI_SERVICE_URL}/lessons/divide-lessons",
+            f"http://localhost:8080/ai/lessons/divide-lessons",      #if you are not using nginx reverse proxy change the url to AI_SERVICE_URL
             json={
                 "pdf_filename": pdf_filename,
                 "lesson_count": lesson_count

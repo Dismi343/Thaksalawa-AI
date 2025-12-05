@@ -26,11 +26,6 @@ pwd_context = CryptContext(
 )
 
 
-
-    
-
-
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 # Hash password
