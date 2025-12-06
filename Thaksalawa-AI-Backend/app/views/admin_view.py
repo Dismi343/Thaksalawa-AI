@@ -25,4 +25,4 @@ def delete_admin_endpoint(admin_id: int):
 
 @router.get('/dashboard')
 def admin_dashboard_endpoint(user=Depends(require_admin)):
-    return {"message": "Welcome to the Admin Dashboard"}
+    return {"message": "Welcome to the Admin Dashboard", "user": user}

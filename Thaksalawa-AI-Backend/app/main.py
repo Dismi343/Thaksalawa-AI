@@ -9,6 +9,7 @@ from app.views.login_view import router as login_router
 from app.views.lesson_view import router as lesson_router
 from app.views.pdf_view import router as pdf_router
 from app.views.subject_view import router as subject_router
+from app.views.login_logs_views import router as login_logs_router
 
 
 app = FastAPI()
@@ -32,7 +33,8 @@ routers=[
     login_router,
     lesson_router,
     pdf_router,
-    subject_router
+    subject_router,
+    login_logs_router
 ]
 
 for r in routers:

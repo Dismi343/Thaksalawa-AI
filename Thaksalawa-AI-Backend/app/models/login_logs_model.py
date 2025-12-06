@@ -10,7 +10,7 @@ class LoginLogsModel(Base):
 
     login_id=Column(Integer,primary_key=True, autoincrement=True)
     login_time=Column(DateTime,default=lambda : datetime.now(SL_TZ))
-    logout_time=Column(DateTime, nullable=True)
+    logout_time=Column(DateTime, nullable=True )
     student_id=Column(Integer, ForeignKey("student.student_id"))
 
     student=relationship("StudentModel",back_populates="login_logs")
