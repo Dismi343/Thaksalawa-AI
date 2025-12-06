@@ -9,9 +9,9 @@ def safe_login_user(request, db):
     except Exception as e:
         raise HTTPException(500, f"Unexpected error: {str(e)}")
     
-def safe_logout_user(user_id,user_type,db):
+def safe_logout_user(user_id,user_type,token,db):
     try:
-        return logout_user(user_id,user_type,db)
+        return logout_user(user_id,user_type,token,db)
     except HTTPException:
         raise
     except Exception as e:

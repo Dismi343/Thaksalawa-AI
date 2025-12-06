@@ -24,7 +24,8 @@ def logout_user_endpoint(current_user :int= Depends(get_current_active_user),db:
     else:
         user_id = current_user['profile']['id']
 
+    token= current_user['token']
     user_type= current_user['role']
-    result = safe_logout_user(user_id,user_type,db)
+    result = safe_logout_user(user_id,user_type,token,db)
     return  {"message": "Logout successful", "data": result}
     
