@@ -5,6 +5,6 @@ def require_admin(current_user=Depends(get_current_user)):
     role_id = None
     if isinstance(current_user, dict):
         role_id = current_user.get("role_id") or (current_user.get("profile") or {}).get("role_id")
-    if role_id != 3:  # 1 = admin
+    if role_id != 3:  # 3 = admin
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user

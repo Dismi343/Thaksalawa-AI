@@ -17,6 +17,7 @@ class StudentModel(Base):
     teacher_teacher_id= Column(Integer, ForeignKey("teacher.teacher_id"))
     teacher = relationship(TeacherModel)
 
+    login_logs=relationship("LoginLogsModel",back_populates="student")
     def to_dict(self):
         return {
             "id": self.student_id,
