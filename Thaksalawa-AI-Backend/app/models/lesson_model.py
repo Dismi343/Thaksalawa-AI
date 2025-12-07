@@ -13,3 +13,4 @@ class LessonModel(Base):
     
     # Relationship
     subject = relationship("SubjectModel", back_populates="lessons")
+    quizzes = relationship("QuizModel", back_populates="lesson", cascade="all, delete-orphan")

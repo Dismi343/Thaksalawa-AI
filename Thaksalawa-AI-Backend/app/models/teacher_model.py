@@ -23,3 +23,5 @@ class TeacherModel(Base):
             "role_id": self.user_role_role_id,
             "type": "teacher"
         }
+    
+    quizzes = relationship("QuizModel", back_populates="teacher")

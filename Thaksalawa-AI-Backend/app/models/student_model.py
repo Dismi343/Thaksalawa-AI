@@ -26,3 +26,6 @@ class StudentModel(Base):
             "role_id": self.user_role_role_id,
             "type": "student"
         }
+    
+    quizzes = relationship("QuizModel", back_populates="student", cascade="all, delete-orphan")
+    answers = relationship("StudentAnswerModel", back_populates="student", cascade="all, delete-orphan")
