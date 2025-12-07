@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../Components/StudentDashboard/Sidebar.jsx';
 import HomeModule from '../Components/StudentDashboard/HomeModule.jsx';
 import QuizPage from "./QuizPage.jsx";
-import ChatModule from './ChatModule.jsx';
+import ChatModule from '../Components/StudentDashboard/ChatModule.jsx';
 import {
   LayoutGrid,
   MessageSquareText,

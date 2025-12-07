@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { 
  
   X, 
-
+  AlertCircle,
 } from 'lucide-react';
+import axios from "axios";
 
 export default function LoginModal({ isOpen, onClose, initialMode = 'login' }){
     const navigate = useNavigate(); 
@@ -57,6 +58,7 @@ export default function LoginModal({ isOpen, onClose, initialMode = 'login' }){
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
+        console.log(formData);
         if (name === 'password') setPasswordError('');
         if (apiError) setApiError('');
     };
@@ -69,20 +71,32 @@ export default function LoginModal({ isOpen, onClose, initialMode = 'login' }){
         if (isLogin) {
             try {
                 // REAL API CALL
-                /*
-                const res = await axios.post('http://127.0.0.1:8000/auth/login', {
-                    username: formData.username,
+                
+                const res = await axios.post('http://127.0.0.1:8000/login', {
+                    email: formData.email,
                     password: formData.password
                 }, { headers: { "Content-Type": "application/json" } });
+
                 console.log(res.data);
-                */
-                
-                // MOCK SUCCESS FOR PREVIEW
+                const token = res.data.access_token;
+                localStorage.setItem("token", token);
+
+                // ⭐ NOW Call dashboard to get user info
+                const userRes = await axios.get("http://127.0.0.1:8000/dashboard", {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const user = userRes.data;
+                console.log("USER:", user);
+
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                onClose();
-                navigate('/studentdashboard'); 
+                if (user.role === "student") navigate("/studentdashboard");
+                else if (user.role === "teacher") navigate("/teacherdashboard");
+                else if (user.role === "admin") navigate("/admindashboard");
                 
+                onClose();
             } catch (e) {
                 console.error("Login error:", e);
                 setApiError('Invalid username or password.');
@@ -104,26 +118,46 @@ export default function LoginModal({ isOpen, onClose, initialMode = 'login' }){
             }
 
             try {
-                // REAL API CALL
-                /*
-                const res = await axios.post('http://127.0.0.1:8000/users/register', {
-                    username: formData.username,
-                    email: formData.email,
-                    password: formData.password,
-                    role: formData.role,
-                    remember: formData.remember
-                }, { headers: { "Content-Type": "application/json" } });
-                */
+                let apiUrl = "";
+                let payload = {};
 
-                // MOCK SUCCESS FOR PREVIEW
+                if (formData.role == 1) {
+                    // STUDENT
+                    apiUrl = "http://127.0.0.1:8000/students/create";
+                    payload = {
+                        st_name: formData.username,
+                        email: formData.email,
+                        password: formData.password,
+                        role_id: formData.role
+                    };
+                } 
+                
+                else if (formData.role == 2) {
+                    // TEACHER
+                    apiUrl = "http://127.0.0.1:8000/teachers/create_teacher";
+                    payload = {
+                        name: formData.username,
+                        email: formData.email,
+                        password: formData.password,
+                        role_id: formData.role
+                    };
+                }
+
+                const res = await axios.post(apiUrl, payload, {
+                    headers: { "Content-Type": "application/json" }
+                });
+
+                console.log("REGISTER RESPONSE:", res.data);
+
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
-                setIsLogin(true); // Switch to login view on success
-                setApiError('');
+                setIsLogin(true); 
                 alert("Registration successful! Please login.");
+                setApiError("");
+
             } catch (e) {
                 console.error("Registration error:", e);
-                setApiError('Registration failed. Try again.');
+                setApiError("Registration failed. Try again.");
             } finally {
                 setIsLoading(false);
             }
@@ -190,14 +224,14 @@ export default function LoginModal({ isOpen, onClose, initialMode = 'login' }){
                         {!isLogin && (
                             <>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Email</label>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Username</label>
                                     <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
+                                        type="text"
+                                        name="username"
+                                        value={formData.username}
                                         onChange={handleChange}
                                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1a4d2e] focus:border-transparent outline-none transition-all"
-                                        placeholder="student@example.com"
+                                        placeholder="Enter username"
                                         required
                                     />
                                 </div>
@@ -212,22 +246,22 @@ export default function LoginModal({ isOpen, onClose, initialMode = 'login' }){
                                         required
                                     >
                                         <option value="">Select user type</option>
-                                        <option value="Student">Student</option>
-                                        <option value="Teacher">Teacher</option>
+                                        <option value={1}>Student</option>
+                                        <option value={2}>Teacher</option>
                                     </select>
                                 </div>
                             </>
                         )}
 
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Username</label>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Email</label>
                             <input
-                                type="text"
-                                name="username"
-                                value={formData.username}
+                                type="email"
+                                name="email"
+                                value={formData.email}
                                 onChange={handleChange}
                                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1a4d2e] focus:border-transparent outline-none transition-all"
-                                placeholder="Enter username"
+                                placeholder="student@example.com"
                                 required
                             />
                         </div>
