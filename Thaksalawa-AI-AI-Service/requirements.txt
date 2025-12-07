@@ -11,3 +11,4 @@ langchain-milvus
 langchain-openai
 openai
 python-dotenv
+chromadb
