@@ -173,43 +173,39 @@ ENGINE = InnoDB;
 -- Table `thaksalawa-ai-db`.`quiz`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`quiz` (
-  `quiz_id` INT NOT NULL,
-  `score` INT NOT NULL,
+  `quiz_id` INT NOT NULL AUTO_INCREMENT,
+  `score` INT NOT NULL DEFAULT 0,
   `q_count` INT NOT NULL,
-  `duration` TIME NOT NULL,
-  `title` VARCHAR(45) NOT NULL,
-  `q_type` ENUM('AI', 'Teacher') NULL,
+  `duration` TIME NULL,
+  `title` VARCHAR(200) NOT NULL,
+  `q_type` ENUM('AI', 'Teacher') NULL DEFAULT 'AI',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `completed_at` DATETIME NULL,
   `Lesson_lesson_id` INT NOT NULL,
-  `Analysis_id` INT NOT NULL,
-  `Analysis_Student_id` INT NOT NULL,
+  `Analysis_id` INT NULL,
+  `Analysis_Student_id` INT NULL,
   `Student_id` INT NOT NULL,
   `teacher_teacher_id` INT NULL,
   PRIMARY KEY (`quiz_id`),
   INDEX `fk_quiz_Lesson1_idx` (`Lesson_lesson_id` ASC) VISIBLE,
-  INDEX `fk_quiz_Analysis1_idx` (`Analysis_id` ASC, `Analysis_Student_id` ASC) VISIBLE,
   INDEX `fk_quiz_Student1_idx` (`Student_id` ASC) VISIBLE,
   INDEX `fk_quiz_teacher1_idx` (`teacher_teacher_id` ASC) VISIBLE,
   CONSTRAINT `fk_quiz_Lesson1`
     FOREIGN KEY (`Lesson_lesson_id`)
-    REFERENCES `thaksalawa-ai-db`.`Lesson` (`lesson_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_quiz_Analysis1`
-    FOREIGN KEY (`Analysis_id` , `Analysis_Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Analysis` (`analysis_id` , `Student_id`)
-    ON DELETE NO ACTION
+    REFERENCES `lesson` (`lesson_id`)
+    ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_quiz_Student1`
     FOREIGN KEY (`Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Student` (`student_id`)
-    ON DELETE NO ACTION
+    REFERENCES `student` (`student_id`)
+    ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_quiz_teacher1`
     FOREIGN KEY (`teacher_teacher_id`)
-    REFERENCES `thaksalawa-ai-db`.`teacher` (`teacher_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    REFERENCES `teacher` (`teacher_id`)
+    ON DELETE SET NULL
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -237,42 +233,62 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`questions` (
   `question_id` INT NOT NULL AUTO_INCREMENT,
   `question_text` MEDIUMTEXT NOT NULL,
   `question_type` ENUM('mcq', 'short') NOT NULL,
-  `source` ENUM('AI', 'Teacher') NOT NULL,
+  `source` ENUM('AI', 'Teacher') NOT NULL DEFAULT 'AI',
+  `explanation` TEXT NULL,
   `quiz_quiz_id` INT NOT NULL,
-  PRIMARY KEY (`question_id`, `quiz_quiz_id`),
+  PRIMARY KEY (`question_id`),
   INDEX `fk_questions_quiz1_idx` (`quiz_quiz_id` ASC) VISIBLE,
   CONSTRAINT `fk_questions_quiz1`
     FOREIGN KEY (`quiz_quiz_id`)
-    REFERENCES `thaksalawa-ai-db`.`quiz` (`quiz_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    REFERENCES `quiz` (`quiz_id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`mcq_options`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`mcq_options` (
+  `option_id` INT NOT NULL AUTO_INCREMENT,
+  `option_text` VARCHAR(500) NOT NULL,
+  `is_correct` TINYINT NOT NULL DEFAULT 0,
+  `option_order` INT NOT NULL,
+  `question_id` INT NOT NULL,
+  PRIMARY KEY (`option_id`),
+  INDEX `fk_mcq_options_questions1_idx` (`question_id` ASC) VISIBLE,
+  CONSTRAINT `fk_mcq_options_questions1`
+    FOREIGN KEY (`question_id`)
+    REFERENCES `questions` (`question_id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `thaksalawa-ai-db`.`student_answer`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`student_answer` (
-  `option_id` INT NOT NULL AUTO_INCREMENT,
-  `option_text` VARCHAR(255) NULL,
-  `is_correct` TINYINT NOT NULL,
+  `answer_id` INT NOT NULL AUTO_INCREMENT,
+  `selected_option` INT NULL,
+  `is_correct` TINYINT NULL,
   `written_answer` MEDIUMTEXT NULL,
-  `questions_quiz_quiz_id` INT NOT NULL,
+  `score_obtained` INT NULL,
+  `feedback` TEXT NULL,
+  `question_id` INT NOT NULL,
   `Student_id` INT NOT NULL,
-  PRIMARY KEY (`option_id`, `questions_quiz_quiz_id`, `Student_id`),
-  INDEX `fk_mcq_options_questions1_idx` (`questions_quiz_quiz_id` ASC) VISIBLE,
+  PRIMARY KEY (`answer_id`),
+  INDEX `fk_student_answer_questions1_idx` (`question_id` ASC) VISIBLE,
   INDEX `fk_student_answer_Student1_idx` (`Student_id` ASC) VISIBLE,
-  CONSTRAINT `fk_mcq_options_questions1`
-    FOREIGN KEY (`questions_quiz_quiz_id`)
-    REFERENCES `thaksalawa-ai-db`.`questions` (`quiz_quiz_id`)
-    ON DELETE NO ACTION
+  CONSTRAINT `fk_student_answer_questions1`
+    FOREIGN KEY (`question_id`)
+    REFERENCES `questions` (`question_id`)
+    ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_student_answer_Student1`
     FOREIGN KEY (`Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Student` (`student_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    REFERENCES `student` (`student_id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -280,16 +296,17 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`model_answer` (
   `model_answer_id` INT NOT NULL AUTO_INCREMENT,
-  `answer_text` VARCHAR(255) NULL,
-  `questions_quiz_quiz_id` INT NOT NULL,
-  PRIMARY KEY (`model_answer_id`, `questions_quiz_quiz_id`),
-  INDEX `fk_model_answer_questions1_idx` (`questions_quiz_quiz_id` ASC) VISIBLE,
+  `answer_text` TEXT NOT NULL,
+  `max_score` INT NOT NULL DEFAULT 10,
+  `question_id` INT NOT NULL,
+  PRIMARY KEY (`model_answer_id`),
+  INDEX `fk_model_answer_questions1_idx` (`question_id` ASC) VISIBLE,
   CONSTRAINT `fk_model_answer_questions1`
-    FOREIGN KEY (`questions_quiz_quiz_id`)
-    REFERENCES `thaksalawa-ai-db`.`questions` (`quiz_quiz_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    FOREIGN KEY (`question_id`)
+    REFERENCES `questions` (`question_id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -297,16 +314,16 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`keywords` (
   `keyword_id` INT NOT NULL AUTO_INCREMENT,
-  `keyword_text` VARCHAR(45) NOT NULL,
+  `keyword_text` VARCHAR(200) NOT NULL,
   `model_answer_model_answer_id` INT NOT NULL,
-  PRIMARY KEY (`keyword_id`, `model_answer_model_answer_id`),
+  PRIMARY KEY (`keyword_id`),
   INDEX `fk_keywords_model_answer1_idx` (`model_answer_model_answer_id` ASC) VISIBLE,
   CONSTRAINT `fk_keywords_model_answer1`
     FOREIGN KEY (`model_answer_model_answer_id`)
-    REFERENCES `thaksalawa-ai-db`.`model_answer` (`model_answer_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    REFERENCES `model_answer` (`model_answer_id`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
