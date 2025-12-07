@@ -3,7 +3,7 @@ import {
   LayoutGrid, MessageSquareText, GraduationCap, PieChart, 
   Code, Settings, LogOut, X, ArrowLeft, Plus, History 
 } from "lucide-react";
-
+import axios from "axios";
 // 1. Mock Data for History (In a real app, fetch this from an API)
 const HISTORY_DATA = {
   chat: [
@@ -23,6 +23,35 @@ const HISTORY_DATA = {
 };
 
 const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen }) => {
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        localStorage.removeItem("token");
+        window.location.href = "/";
+        return;
+      }
+
+      await axios.post("http://127.0.0.1:8000/logout", {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      // Clear token after server logout
+      localStorage.removeItem("token");
+      window.location.href = "/";
+
+    } catch (err) {
+      console.error("Logout failed:", err);
+
+      // Still force logout on client-side
+      localStorage.removeItem("token");
+      window.location.href = "/";
+    }
+  };
   
   // Helper to determine if we are in a "History Mode" page
   const isHistoryPage = ['chat', 'quiz', 'code'].includes(activePage);
@@ -148,11 +177,11 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen }) => {
         <div className="space-y-2 pt-6 border-t border-slate-100 shrink-0">
           {!isHistoryPage && <NavItem icon={Settings} label="Settings" pageId="settings" />}
           <button 
-            onClick={() => window.location.href = "/"} 
+            onClick={handleLogout}
             className="flex items-center gap-3 w-full p-3 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all"
           >
             <LogOut size={20} />
-            <span className="font-medium text-sm">Logout</span>
+            <span className="font-medium text-sm hidden lg:block">Logout</span>
           </button>
         </div>
       </aside>
