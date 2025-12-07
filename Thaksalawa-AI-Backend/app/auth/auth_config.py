@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.models.student_model import StudentModel
 from app.models.teacher_model import TeacherModel
 from app.models.admin_model import AdminModel
-
+from app.models.blacklist_token import BlacklistTokenModel
 
 
 load_dotenv()
@@ -24,11 +24,6 @@ pwd_context = CryptContext(
     schemes=["pbkdf2_sha256"],
     deprecated="auto"
 )
-
-
-
-    
-
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
@@ -49,7 +44,7 @@ def create_access_token(data: dict, expires_delta:timedelta | None=None):
     if expires_delta:
          expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -80,11 +75,15 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],db: Session =
         or db.query(AdminModel).filter(AdminModel.email == email).first()
     )
 
+    if is_token_blacklisted(token,db):
+        raise HTTPException(status_code=401, detail="Token has been revoked")
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {  
         "profile": user.to_dict(),
         "role": role,
+        "token": token
     }
 
 
@@ -93,3 +92,21 @@ async def get_current_active_user(
     print("Current Role:", current_user["role"])
     return current_user
 
+
+def is_token_blacklisted(token:str,db:Session=Depends(get_db)):
+    blacklisted_token=db.query(BlacklistTokenModel).filter(BlacklistTokenModel.token==token).first()
+
+    if blacklisted_token is None:
+        return False
+    
+    blacklisted_at = blacklisted_token.blacklisted_at
+    if blacklisted_at.tzinfo is None:
+        blacklisted_at = blacklisted_at.replace(tzinfo=timezone.utc)
+
+    time_since_blacklisted = datetime.now(timezone.utc) - blacklisted_at
+
+    if time_since_blacklisted > timedelta(hours=1):
+        db.delete(blacklisted_token)
+        db.commit()
+        return False
+    return True

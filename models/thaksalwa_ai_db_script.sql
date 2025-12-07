@@ -120,8 +120,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`Lesson` (
   `lesson_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
   `lesson_number` INT NOT NULL,
-  `name` VARCHAR(255) NOT NULL,
   `content` LONGTEXT NOT NULL,
   `Subject_sub_id` INT NOT NULL,
   PRIMARY KEY (`lesson_id`, `Subject_sub_id`),
@@ -130,8 +130,8 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`Lesson` (
     FOREIGN KEY (`Subject_sub_id`)
     REFERENCES `thaksalawa-ai-db`.`Subject` (`sub_id`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION
-) ENGINE = InnoDB;
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -218,6 +218,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`login_logs` (
   `login_id` INT NOT NULL AUTO_INCREMENT,
   `login_time` TIME NULL,
+  `logout_time` TIME NULL,
   `Student_id` INT NOT NULL,
   PRIMARY KEY (`login_id`, `Student_id`),
   INDEX `fk_login_logs_Student1_idx` (`Student_id` ASC) VISIBLE,
@@ -324,6 +325,17 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`admin` (
     REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`blacklisted_tokens`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`blacklisted_tokens` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `token` VARCHAR(255) NOT NULL,
+  `blacklisted_at` DATETIME NOT NULL,
+  PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
 

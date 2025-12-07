@@ -9,3 +9,7 @@ class UserRole(Base):
     role_id = Column(Integer, primary_key=True, autoincrement=True)
     role_name = Column(Enum(RoleEnum), unique=True, nullable=False)
 
+
+    student= relationship("StudentModel", back_populates="role")
+    teacher= relationship("TeacherModel", back_populates="role")
+    admin= relationship("AdminModel", back_populates="role")
