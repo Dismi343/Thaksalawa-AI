@@ -9,9 +9,9 @@ def safe_create_chat(student_id:int,db):
     except Exception as e:
         raise HTTPException(500, f"Unexpected error: {str(e)}")
     
-def safe_send_message_to_ai(chat_id:int,query:str,db):
+def safe_send_message_to_ai(chat_id:int,query:str,source:str,db):
     try:
-        return send_message_to_ai(chat_id,query,db)
+        return send_message_to_ai(chat_id,query,source,db)
     except HTTPException:
         raise 
     except Exception as e:

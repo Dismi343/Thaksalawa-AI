@@ -24,6 +24,6 @@ def start_chat_endpoint(current_user : Annotated[dict,Depends(get_current_active
 @router.post("/{chat_id}/message")
 def send_message_endpoint(chat_id:int,data:Messagerequest, db=Depends(get_db)):
     """Send a message to the AI and get a response"""
-    return safe_send_message_to_ai(chat_id, data.query, db)
+    return safe_send_message_to_ai(chat_id, data.query, data.source, db)
 
 

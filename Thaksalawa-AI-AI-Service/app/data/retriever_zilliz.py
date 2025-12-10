@@ -18,7 +18,7 @@ def get_zilliz_retriever(source: Optional[str] = None, k: int = 5):
     if source:
         # metadata filter by source (filename)
         # The exact key for filter can depend on langchain version, but this is the general pattern.
-        search_kwargs["filter"] = {"source": source}
+        search_kwargs["expr"] = f"source == '{source}'"
 
     retriever = vector_store.as_retriever(search_kwargs=search_kwargs)
     return retriever

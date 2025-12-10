@@ -27,11 +27,11 @@ def create_chat(student_id:int,db:Session=Depends(get_db) ):
         "timestamp": chat.timestamp
     }
 
-def send_message_to_ai(chat_id:int,query:str,db:Session=Depends(get_db)):
+def send_message_to_ai(chat_id:int,query:str,source:str,db:Session=Depends(get_db)):
     try:
         ai_resp = requests.post(
             AI_SERVICE_URL,
-            json={"query": query},
+            json={"query": query, "source":source},
             timeout=1000
         )
         ai_resp.raise_for_status()

@@ -16,3 +16,4 @@ class MessageRespone(BaseModel):
 
 class Messagerequest(BaseModel):
     query:str
+    source:str
