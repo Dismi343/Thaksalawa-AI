@@ -11,6 +11,8 @@ from app.views.pdf_view import router as pdf_router
 from app.views.subject_view import router as subject_router
 from app.views.login_logs_views import router as login_logs_router
 from app.views.quiz_view import router as quiz_router
+from app.views.chat_view import router as chat_router
+from app.views.message_view import router as message_router
 
 app = FastAPI()
 
@@ -35,7 +37,9 @@ routers=[
     pdf_router,
     subject_router,
     login_logs_router,
-    quiz_router
+    quiz_router,
+    chat_router,
+    message_router
 ]
 
 for r in routers:

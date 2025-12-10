@@ -19,6 +19,8 @@ Base = declarative_base()
 import app.models.pdf_model
 import app.models.subject_model
 import app.models.lesson_model
+import app.models.chat_model
+import app.models.message_model
 
 def get_db():
     db=SessionLocal()

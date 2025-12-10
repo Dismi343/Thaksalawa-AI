@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, DateTime,ForeignKey
+from sqlalchemy import Column, Integer, DateTime,ForeignKey,Date
 from sqlalchemy.orm import relationship
 from datetime import datetime, timedelta, timezone
 from app.database.mysql_database import Base
@@ -9,6 +9,7 @@ class LoginLogsModel(Base):
     __tablename__="login_logs"
 
     login_id=Column(Integer,primary_key=True, autoincrement=True)
+    login_date=Column(Date, default=lambda : datetime.now(SL_TZ).date())
     login_time=Column(DateTime,default=lambda : datetime.now(SL_TZ))
     logout_time=Column(DateTime, nullable=True )
     student_id=Column(Integer, ForeignKey("student.student_id"))

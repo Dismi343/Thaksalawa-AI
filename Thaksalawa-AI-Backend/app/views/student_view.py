@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
 from app.services.student_service import safe_create_student,safe_get_all_students,safe_get_student_by_id,safe_delete_student
 from app.schema.student_schema import StudentSchema
+from app.dependencies.student_dependencies import require_student
 
 router =APIRouter(
     prefix="/students",
@@ -22,3 +23,7 @@ def get_student_by_id_endpoint(student_id: int):
 @router.delete('/delete_student/{student_id}')
 def delete_student_endpoint(student_id: int):
     return safe_delete_student(student_id)
+
+@router.get('/dashboard')
+def admin_dashboard_endpoint(user=Depends(require_student)):
+    return {"message": "Welcome to the Admin Dashboard", "user": user}

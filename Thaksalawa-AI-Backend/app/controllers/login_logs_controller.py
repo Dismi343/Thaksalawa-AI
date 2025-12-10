@@ -36,6 +36,7 @@ def get_login_logs_by_student_id(student_id: int, db: Session = Depends(get_db))
             result.append({
                 "login_id": log.login_id,
                 "student_id": log.student_id,
+                "login_date": log.login_date,
                 "login_time": log.login_time,
                 "logout_time": log.logout_time,
                 "duration_seconds": duration
@@ -87,7 +88,14 @@ def get_last_login_log_by_student_id(student_id: int, db: Session = Depends(get_
         log = db.query(LoginLogsModel).filter(LoginLogsModel.student_id == student_id).order_by(LoginLogsModel.login_id.desc()).offset(1).first()
         logout_time=None
         if not log:
-            raise HTTPException(status_code=404, detail="Login log not found")
+            return {
+                "login_id": None,
+                "student_id": student_id,
+                "login_date": None,
+                "login_time": None,
+                "logout_time": None,
+                "duration_seconds": None
+        }
         if log.logout_time is None:
             duration = None 
             logout_time=30*60
@@ -97,6 +105,7 @@ def get_last_login_log_by_student_id(student_id: int, db: Session = Depends(get_
         return ({
                 "login_id": log.login_id,
                 "student_id": log.student_id,
+                "login_date": log.login_date,
                 "login_time": log.login_time,
                 "logout_time": logout_time,
                 "duration_seconds": duration

@@ -34,7 +34,7 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen }) => {
         return;
       }
 
-      await axios.post("http://127.0.0.1:8000/logout", {}, {
+      await axios.post("http://localhost:8080/user/logout", {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }

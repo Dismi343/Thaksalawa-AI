@@ -5,13 +5,16 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
 -- Schema thaksalawa-ai-db
 -- -----------------------------------------------------
 
 -- -----------------------------------------------------
 -- Schema thaksalawa-ai-db
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `thaksalawa-ai-db` DEFAULT CHARACTER SET utf8 ;
+CREATE SCHEMA IF NOT EXISTS `thaksalawa-ai-db` DEFAULT CHARACTER SET utf8mb3 ;
 USE `thaksalawa-ai-db` ;
 
 -- -----------------------------------------------------
@@ -21,309 +24,8 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`user_role` (
   `role_id` INT NOT NULL AUTO_INCREMENT,
   `role_name` ENUM('student', 'teacher', 'admin') NOT NULL,
   PRIMARY KEY (`role_id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`teacher`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`teacher` (
-  `teacher_id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(255) NOT NULL,
-  `email` VARCHAR(100) NOT NULL,
-  `password` VARCHAR(255) NOT NULL,
-  `user_role_role_id` INT NOT NULL,
-  PRIMARY KEY (`teacher_id`, `user_role_role_id`),
-  INDEX `fk_teacher_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
-  CONSTRAINT `fk_teacher_user_role1`
-    FOREIGN KEY (`user_role_role_id`)
-    REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`Student`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`Student` (
-  `student_id` INT NOT NULL AUTO_INCREMENT,
-  `st_name` VARCHAR(255) NOT NULL,
-  `password` VARCHAR(255) NOT NULL,
-  `email` VARCHAR(100) NOT NULL,
-  `teacher_teacher_id` INT NULL,
-  `user_role_role_id` INT NOT NULL,
-  PRIMARY KEY (`student_id`, `user_role_role_id`),
-  INDEX `fk_Student_teacher1_idx` (`teacher_teacher_id` ASC) VISIBLE,
-  INDEX `fk_Student_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
-  CONSTRAINT `fk_Student_teacher1`
-    FOREIGN KEY (`teacher_teacher_id`)
-    REFERENCES `thaksalawa-ai-db`.`teacher` (`teacher_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Student_user_role1`
-    FOREIGN KEY (`user_role_role_id`)
-    REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`Analysis`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`Analysis` (
-  `analysis_id` INT NOT NULL AUTO_INCREMENT,
-  `qId` INT NOT NULL,
-  `Student_id` INT NOT NULL,
-  PRIMARY KEY (`analysis_id`, `Student_id`),
-  INDEX `fk_Analysis_Student1_idx` (`Student_id` ASC) VISIBLE,
-  CONSTRAINT `fk_Analysis_Student1`
-    FOREIGN KEY (`Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Student` (`student_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`pdf`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`pdf` (
-  `pdf_id` INT NOT NULL AUTO_INCREMENT,
-  `file_name` VARCHAR(255) NOT NULL,
-  `file_data` LONGBLOB NOT NULL,
-  `uploaded_at` DATETIME NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (`pdf_id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`Subject`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`Subject` (
-  `sub_id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(100) NULL,
-  `pdf_pdf_id` INT NOT NULL,
-  PRIMARY KEY (`sub_id`, `pdf_pdf_id`),
-  INDEX `fk_Subject_pdf1_idx` (`pdf_pdf_id` ASC) VISIBLE,
-  CONSTRAINT `fk_Subject_pdf1`
-    FOREIGN KEY (`pdf_pdf_id`)
-    REFERENCES `thaksalawa-ai-db`.`pdf` (`pdf_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`Lesson`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`Lesson` (
-  `lesson_id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(100) NOT NULL,
-  `lesson_number` INT NOT NULL,
-  `content` LONGTEXT NOT NULL,
-  `Subject_sub_id` INT NOT NULL,
-  PRIMARY KEY (`lesson_id`, `Subject_sub_id`),
-  INDEX `fk_Lesson_Subject1_idx` (`Subject_sub_id` ASC) VISIBLE,
-  CONSTRAINT `fk_Lesson_Subject1`
-    FOREIGN KEY (`Subject_sub_id`)
-    REFERENCES `thaksalawa-ai-db`.`Subject` (`sub_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`chat`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`chat` (
-  `chat_id` INT NOT NULL AUTO_INCREMENT,
-  `timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `Student_id` INT NOT NULL,
-  PRIMARY KEY (`chat_id`, `Student_id`),
-  INDEX `fk_chat_Student1_idx` (`Student_id` ASC) VISIBLE,
-  CONSTRAINT `fk_chat_Student1`
-    FOREIGN KEY (`Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Student` (`student_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`message`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`message` (
-  `message_id` INT NOT NULL AUTO_INCREMENT,
-  `query` MEDIUMTEXT NOT NULL,
-  `message` MEDIUMTEXT NOT NULL,
-  `chat_chat_id` INT NOT NULL,
-  PRIMARY KEY (`message_id`, `chat_chat_id`),
-  INDEX `fk_message_chat1_idx` (`chat_chat_id` ASC) VISIBLE,
-  CONSTRAINT `fk_message_chat1`
-    FOREIGN KEY (`chat_chat_id`)
-    REFERENCES `thaksalawa-ai-db`.`chat` (`chat_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`quiz`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`quiz` (
-  `quiz_id` INT NOT NULL AUTO_INCREMENT,
-  `score` INT NOT NULL DEFAULT 0,
-  `q_count` INT NOT NULL,
-  `duration` TIME NULL,
-  `title` VARCHAR(200) NOT NULL,
-  `q_type` ENUM('AI', 'Teacher') NULL DEFAULT 'AI',
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `completed_at` DATETIME NULL,
-  `Lesson_lesson_id` INT NOT NULL,
-  `Analysis_id` INT NULL,
-  `Analysis_Student_id` INT NULL,
-  `Student_id` INT NOT NULL,
-  `teacher_teacher_id` INT NULL,
-  PRIMARY KEY (`quiz_id`),
-  INDEX `fk_quiz_Lesson1_idx` (`Lesson_lesson_id` ASC) VISIBLE,
-  INDEX `fk_quiz_Student1_idx` (`Student_id` ASC) VISIBLE,
-  INDEX `fk_quiz_teacher1_idx` (`teacher_teacher_id` ASC) VISIBLE,
-  CONSTRAINT `fk_quiz_Lesson1`
-    FOREIGN KEY (`Lesson_lesson_id`)
-    REFERENCES `lesson` (`lesson_id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_quiz_Student1`
-    FOREIGN KEY (`Student_id`)
-    REFERENCES `student` (`student_id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_quiz_teacher1`
-    FOREIGN KEY (`teacher_teacher_id`)
-    REFERENCES `teacher` (`teacher_id`)
-    ON DELETE SET NULL
-    ON UPDATE NO ACTION
-) ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`login_logs`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`login_logs` (
-  `login_id` INT NOT NULL AUTO_INCREMENT,
-  `login_time` TIME NULL,
-  `logout_time` TIME NULL,
-  `Student_id` INT NOT NULL,
-  PRIMARY KEY (`login_id`, `Student_id`),
-  INDEX `fk_login_logs_Student1_idx` (`Student_id` ASC) VISIBLE,
-  CONSTRAINT `fk_login_logs_Student1`
-    FOREIGN KEY (`Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`Student` (`student_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`questions`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`questions` (
-  `question_id` INT NOT NULL AUTO_INCREMENT,
-  `question_text` MEDIUMTEXT NOT NULL,
-  `question_type` ENUM('mcq', 'short') NOT NULL,
-  `source` ENUM('AI', 'Teacher') NOT NULL DEFAULT 'AI',
-  `explanation` TEXT NULL,
-  `quiz_quiz_id` INT NOT NULL,
-  PRIMARY KEY (`question_id`),
-  INDEX `fk_questions_quiz1_idx` (`quiz_quiz_id` ASC) VISIBLE,
-  CONSTRAINT `fk_questions_quiz1`
-    FOREIGN KEY (`quiz_quiz_id`)
-    REFERENCES `quiz` (`quiz_id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION
-) ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`mcq_options`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`mcq_options` (
-  `option_id` INT NOT NULL AUTO_INCREMENT,
-  `option_text` VARCHAR(500) NOT NULL,
-  `is_correct` TINYINT NOT NULL DEFAULT 0,
-  `option_order` INT NOT NULL,
-  `question_id` INT NOT NULL,
-  PRIMARY KEY (`option_id`),
-  INDEX `fk_mcq_options_questions1_idx` (`question_id` ASC) VISIBLE,
-  CONSTRAINT `fk_mcq_options_questions1`
-    FOREIGN KEY (`question_id`)
-    REFERENCES `questions` (`question_id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION
-) ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`student_answer`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`student_answer` (
-  `answer_id` INT NOT NULL AUTO_INCREMENT,
-  `selected_option` INT NULL,
-  `is_correct` TINYINT NULL,
-  `written_answer` MEDIUMTEXT NULL,
-  `score_obtained` INT NULL,
-  `feedback` TEXT NULL,
-  `question_id` INT NOT NULL,
-  `Student_id` INT NOT NULL,
-  PRIMARY KEY (`answer_id`),
-  INDEX `fk_student_answer_questions1_idx` (`question_id` ASC) VISIBLE,
-  INDEX `fk_student_answer_Student1_idx` (`Student_id` ASC) VISIBLE,
-  CONSTRAINT `fk_student_answer_questions1`
-    FOREIGN KEY (`question_id`)
-    REFERENCES `questions` (`question_id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_student_answer_Student1`
-    FOREIGN KEY (`Student_id`)
-    REFERENCES `student` (`student_id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION
-) ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`model_answer`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`model_answer` (
-  `model_answer_id` INT NOT NULL AUTO_INCREMENT,
-  `answer_text` TEXT NOT NULL,
-  `max_score` INT NOT NULL DEFAULT 10,
-  `question_id` INT NOT NULL,
-  PRIMARY KEY (`model_answer_id`),
-  INDEX `fk_model_answer_questions1_idx` (`question_id` ASC) VISIBLE,
-  CONSTRAINT `fk_model_answer_questions1`
-    FOREIGN KEY (`question_id`)
-    REFERENCES `questions` (`question_id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION
-) ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`keywords`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`keywords` (
-  `keyword_id` INT NOT NULL AUTO_INCREMENT,
-  `keyword_text` VARCHAR(200) NOT NULL,
-  `model_answer_model_answer_id` INT NOT NULL,
-  PRIMARY KEY (`keyword_id`),
-  INDEX `fk_keywords_model_answer1_idx` (`model_answer_model_answer_id` ASC) VISIBLE,
-  CONSTRAINT `fk_keywords_model_answer1`
-    FOREIGN KEY (`model_answer_model_answer_id`)
-    REFERENCES `model_answer` (`model_answer_id`)
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION
-) ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
@@ -339,10 +41,66 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`admin` (
   INDEX `fk_admin_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
   CONSTRAINT `fk_admin_user_role1`
     FOREIGN KEY (`user_role_role_id`)
-    REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`teacher`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`teacher` (
+  `teacher_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `password` VARCHAR(255) NOT NULL,
+  `user_role_role_id` INT NOT NULL,
+  PRIMARY KEY (`teacher_id`, `user_role_role_id`),
+  INDEX `fk_teacher_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
+  CONSTRAINT `fk_teacher_user_role1`
+    FOREIGN KEY (`user_role_role_id`)
+    REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`student`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`student` (
+  `student_id` INT NOT NULL AUTO_INCREMENT,
+  `st_name` VARCHAR(255) NOT NULL,
+  `password` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `teacher_teacher_id` INT NULL DEFAULT NULL,
+  `user_role_role_id` INT NOT NULL,
+  PRIMARY KEY (`student_id`, `user_role_role_id`),
+  INDEX `fk_Student_teacher1_idx` (`teacher_teacher_id` ASC) VISIBLE,
+  INDEX `fk_Student_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
+  CONSTRAINT `fk_Student_teacher1`
+    FOREIGN KEY (`teacher_teacher_id`)
+    REFERENCES `thaksalawa-ai-db`.`teacher` (`teacher_id`),
+  CONSTRAINT `fk_Student_user_role1`
+    FOREIGN KEY (`user_role_role_id`)
+    REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`analysis`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`analysis` (
+  `analysis_id` INT NOT NULL AUTO_INCREMENT,
+  `qId` INT NOT NULL,
+  `Student_id` INT NOT NULL,
+  PRIMARY KEY (`analysis_id`, `Student_id`),
+  INDEX `fk_Analysis_Student1_idx` (`Student_id` ASC) VISIBLE,
+  CONSTRAINT `fk_Analysis_Student1`
+    FOREIGN KEY (`Student_id`)
+    REFERENCES `thaksalawa-ai-db`.`student` (`student_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
@@ -353,7 +111,244 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`blacklisted_tokens` (
   `token` VARCHAR(255) NOT NULL,
   `blacklisted_at` DATETIME NOT NULL,
   PRIMARY KEY (`id`))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`chat`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`chat` (
+  `chat_id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Student_id` INT NOT NULL,
+  PRIMARY KEY (`chat_id`, `Student_id`),
+  INDEX `fk_chat_Student1_idx` (`Student_id` ASC) VISIBLE,
+  CONSTRAINT `fk_chat_Student1`
+    FOREIGN KEY (`Student_id`)
+    REFERENCES `thaksalawa-ai-db`.`student` (`student_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`pdf`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`pdf` (
+  `pdf_id` INT NOT NULL AUTO_INCREMENT,
+  `file_name` VARCHAR(255) NOT NULL,
+  `file_data` LONGBLOB NOT NULL,
+  `uploaded_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`pdf_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`subject`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`subject` (
+  `sub_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NULL DEFAULT NULL,
+  `pdf_pdf_id` INT NOT NULL,
+  PRIMARY KEY (`sub_id`, `pdf_pdf_id`),
+  INDEX `fk_Subject_pdf1_idx` (`pdf_pdf_id` ASC) VISIBLE,
+  CONSTRAINT `fk_Subject_pdf1`
+    FOREIGN KEY (`pdf_pdf_id`)
+    REFERENCES `thaksalawa-ai-db`.`pdf` (`pdf_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`lesson`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`lesson` (
+  `lesson_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  `lesson_number` INT NOT NULL,
+  `content` LONGTEXT NOT NULL,
+  `Subject_sub_id` INT NOT NULL,
+  PRIMARY KEY (`lesson_id`, `Subject_sub_id`),
+  INDEX `fk_Lesson_Subject1_idx` (`Subject_sub_id` ASC) VISIBLE,
+  CONSTRAINT `fk_Lesson_Subject1`
+    FOREIGN KEY (`Subject_sub_id`)
+    REFERENCES `thaksalawa-ai-db`.`subject` (`sub_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`quiz`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`quiz` (
+  `quiz_id` INT NOT NULL AUTO_INCREMENT,
+  `score` INT NOT NULL DEFAULT '0',
+  `q_count` INT NOT NULL,
+  `duration` TIME NULL DEFAULT NULL,
+  `title` VARCHAR(200) NOT NULL,
+  `q_type` ENUM('AI', 'Teacher') NULL DEFAULT 'AI',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `completed_at` DATETIME NULL DEFAULT NULL,
+  `Lesson_lesson_id` INT NOT NULL,
+  `Analysis_id` INT NULL DEFAULT NULL,
+  `Analysis_Student_id` INT NULL DEFAULT NULL,
+  `Student_id` INT NOT NULL,
+  `teacher_teacher_id` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`quiz_id`),
+  INDEX `fk_quiz_Lesson1_idx` (`Lesson_lesson_id` ASC) VISIBLE,
+  INDEX `fk_quiz_Student1_idx` (`Student_id` ASC) VISIBLE,
+  INDEX `fk_quiz_teacher1_idx` (`teacher_teacher_id` ASC) VISIBLE,
+  CONSTRAINT `fk_quiz_Lesson1`
+    FOREIGN KEY (`Lesson_lesson_id`)
+    REFERENCES `thaksalawa-ai-db`.`lesson` (`lesson_id`)
+    ON DELETE CASCADE,
+  CONSTRAINT `fk_quiz_Student1`
+    FOREIGN KEY (`Student_id`)
+    REFERENCES `thaksalawa-ai-db`.`student` (`student_id`)
+    ON DELETE CASCADE,
+  CONSTRAINT `fk_quiz_teacher1`
+    FOREIGN KEY (`teacher_teacher_id`)
+    REFERENCES `thaksalawa-ai-db`.`teacher` (`teacher_id`)
+    ON DELETE SET NULL)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`questions`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`questions` (
+  `question_id` INT NOT NULL AUTO_INCREMENT,
+  `question_text` MEDIUMTEXT NOT NULL,
+  `question_type` ENUM('mcq', 'short') NOT NULL,
+  `source` ENUM('AI', 'Teacher') NOT NULL DEFAULT 'AI',
+  `explanation` TEXT NULL DEFAULT NULL,
+  `quiz_quiz_id` INT NOT NULL,
+  PRIMARY KEY (`question_id`),
+  INDEX `fk_questions_quiz1_idx` (`quiz_quiz_id` ASC) VISIBLE,
+  CONSTRAINT `fk_questions_quiz1`
+    FOREIGN KEY (`quiz_quiz_id`)
+    REFERENCES `thaksalawa-ai-db`.`quiz` (`quiz_id`)
+    ON DELETE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`model_answer`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`model_answer` (
+  `model_answer_id` INT NOT NULL AUTO_INCREMENT,
+  `answer_text` TEXT NOT NULL,
+  `max_score` INT NOT NULL DEFAULT '10',
+  `question_id` INT NOT NULL,
+  PRIMARY KEY (`model_answer_id`),
+  INDEX `fk_model_answer_questions1_idx` (`question_id` ASC) VISIBLE,
+  CONSTRAINT `fk_model_answer_questions1`
+    FOREIGN KEY (`question_id`)
+    REFERENCES `thaksalawa-ai-db`.`questions` (`question_id`)
+    ON DELETE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`keywords`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`keywords` (
+  `keyword_id` INT NOT NULL AUTO_INCREMENT,
+  `keyword_text` VARCHAR(200) NOT NULL,
+  `model_answer_model_answer_id` INT NOT NULL,
+  PRIMARY KEY (`keyword_id`),
+  INDEX `fk_keywords_model_answer1_idx` (`model_answer_model_answer_id` ASC) VISIBLE,
+  CONSTRAINT `fk_keywords_model_answer1`
+    FOREIGN KEY (`model_answer_model_answer_id`)
+    REFERENCES `thaksalawa-ai-db`.`model_answer` (`model_answer_id`)
+    ON DELETE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`login_logs`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`login_logs` (
+  `login_id` INT NOT NULL AUTO_INCREMENT,
+  `login_date` DATE NOT NULL,
+  `login_time` TIME NULL DEFAULT NULL,
+  `logout_time` TIME NULL DEFAULT NULL,
+  `Student_id` INT NOT NULL,
+  PRIMARY KEY (`login_id`, `Student_id`),
+  INDEX `fk_login_logs_Student1_idx` (`Student_id` ASC) VISIBLE,
+  CONSTRAINT `fk_login_logs_Student1`
+    FOREIGN KEY (`Student_id`)
+    REFERENCES `thaksalawa-ai-db`.`student` (`student_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`mcq_options`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`mcq_options` (
+  `option_id` INT NOT NULL AUTO_INCREMENT,
+  `option_text` VARCHAR(500) NOT NULL,
+  `is_correct` TINYINT NOT NULL DEFAULT '0',
+  `option_order` INT NOT NULL,
+  `question_id` INT NOT NULL,
+  PRIMARY KEY (`option_id`),
+  INDEX `fk_mcq_options_questions1_idx` (`question_id` ASC) VISIBLE,
+  CONSTRAINT `fk_mcq_options_questions1`
+    FOREIGN KEY (`question_id`)
+    REFERENCES `thaksalawa-ai-db`.`questions` (`question_id`)
+    ON DELETE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`message`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`message` (
+  `message_id` INT NOT NULL AUTO_INCREMENT,
+  `query` MEDIUMTEXT NOT NULL,
+  `message` MEDIUMTEXT NOT NULL,
+  `chat_chat_id` INT NOT NULL,
+  PRIMARY KEY (`message_id`, `chat_chat_id`),
+  INDEX `fk_message_chat1_idx` (`chat_chat_id` ASC) VISIBLE,
+  CONSTRAINT `fk_message_chat1`
+    FOREIGN KEY (`chat_chat_id`)
+    REFERENCES `thaksalawa-ai-db`.`chat` (`chat_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`student_answer`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`student_answer` (
+  `answer_id` INT NOT NULL AUTO_INCREMENT,
+  `selected_option` INT NULL DEFAULT NULL,
+  `is_correct` TINYINT NULL DEFAULT NULL,
+  `written_answer` MEDIUMTEXT NULL DEFAULT NULL,
+  `score_obtained` INT NULL DEFAULT NULL,
+  `feedback` TEXT NULL DEFAULT NULL,
+  `question_id` INT NOT NULL,
+  `Student_id` INT NOT NULL,
+  PRIMARY KEY (`answer_id`),
+  INDEX `fk_student_answer_questions1_idx` (`question_id` ASC) VISIBLE,
+  INDEX `fk_student_answer_Student1_idx` (`Student_id` ASC) VISIBLE,
+  CONSTRAINT `fk_student_answer_questions1`
+    FOREIGN KEY (`question_id`)
+    REFERENCES `thaksalawa-ai-db`.`questions` (`question_id`)
+    ON DELETE CASCADE,
+  CONSTRAINT `fk_student_answer_Student1`
+    FOREIGN KEY (`Student_id`)
+    REFERENCES `thaksalawa-ai-db`.`student` (`student_id`)
+    ON DELETE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

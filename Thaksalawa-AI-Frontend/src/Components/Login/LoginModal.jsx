@@ -72,7 +72,7 @@ export default function LoginModal({ isOpen, onClose, initialMode = 'login' }){
             try {
                 // REAL API CALL
                 
-                const res = await axios.post('http://127.0.0.1:8000/login', {
+                const res = await axios.post('http://localhost:8080/user/login', {
                     email: formData.email,
                     password: formData.password
                 }, { headers: { "Content-Type": "application/json" } });
@@ -82,7 +82,7 @@ export default function LoginModal({ isOpen, onClose, initialMode = 'login' }){
                 localStorage.setItem("token", token);
 
                 // ⭐ NOW Call dashboard to get user info
-                const userRes = await axios.get("http://127.0.0.1:8000/dashboard", {
+                const userRes = await axios.get("http://localhost:8080/user/dashboard", {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -95,7 +95,7 @@ export default function LoginModal({ isOpen, onClose, initialMode = 'login' }){
                 if (user.role === "student") navigate("/studentdashboard");
                 else if (user.role === "teacher") navigate("/teacherdashboard");
                 else if (user.role === "admin") navigate("/admindashboard");
-                
+                console.log("user:", user.profile.name);
                 onClose();
             } catch (e) {
                 console.error("Login error:", e);
