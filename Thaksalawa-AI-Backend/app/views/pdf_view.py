@@ -11,13 +11,14 @@ router = APIRouter(
 async def upload_pdf_endpoint(file: UploadFile = File(...), db=Depends(get_db)):
     return await safe_upload_pdf(file, db)
 
-@router.get('/get-all')
+@router.get('/get-all',response_model=list[PDFUploadResponse])
 def get_all_pdfs_endpoint(db=Depends(get_db)):
     return safe_get_all_pdfs(db)
 
 @router.get('/get/{pdf_id}')
 def get_pdf_by_id_endpoint(pdf_id: int, db=Depends(get_db)):
     return safe_get_pdf_by_id(pdf_id, db)
+
 @router.delete('/delete/{pdf_id}')
 def delete_pdf_endpoint(pdf_id: int, db=Depends(get_db)):
     return safe_delete_pdf(pdf_id, db)

@@ -44,7 +44,7 @@ def get_all_pdfs(db:Session=Depends(get_db)):
     pdf_list=[]
     for m in pdfs:
         pdf_list.append({
-        "file_id":m.pdf_id,
+        "pdf_id":m.pdf_id,
         "file_name":m.file_name,
         "uploaded_at":m.uploaded_at
         })
