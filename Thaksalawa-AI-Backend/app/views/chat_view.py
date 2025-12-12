@@ -11,7 +11,8 @@ from app.services.chat_service import (
     safe_edit_sent_message
 )
 from app.schema.chat_schema import (
-    ChatResponse
+    ChatResponse,
+    ChatCreate
 )
 from app.dependencies.student_dependencies import require_student
 router= APIRouter(
@@ -20,21 +21,21 @@ router= APIRouter(
 )
 
 @router.post("/start-chat", response_model=ChatResponse)
-def start_chat_endpoint(current_user : Annotated[dict,Depends(get_current_active_user)], user=Depends(require_student),db=Depends(get_db)):
+def start_chat_endpoint(data:ChatCreate, current_user : Annotated[dict,Depends(get_current_active_user)], user=Depends(require_student),db=Depends(get_db)):
     """Start a new chat session for a student"""
     student_id=current_user['profile']['id']
-    return safe_create_chat(student_id, user,db)
+    return safe_create_chat(student_id,data.subject_id, user,db)
 
 @router.post("/{chat_id}/message")
 def send_message_endpoint(chat_id:int,data:Messagerequest, db=Depends(get_db)):
     """Send a message to the AI and get a response"""
     return safe_send_message_to_ai(chat_id, data.query, data.source, db)
 
-@router.get("/get-all-chats", response_model=list[ChatResponse])
-def get_student_chats_endpoint(current_user : Annotated[dict,Depends(get_current_active_user)], db=Depends(get_db)):
+@router.get("/get-all-chats/{subject_id}", response_model=list[ChatResponse])
+def get_student_chats_endpoint(subject_id:int, current_user : Annotated[dict,Depends(get_current_active_user)], db=Depends(get_db)):
     """Get all chat sessions for a student"""
     student_id=current_user['profile']['id']
-    return safe_get_chats_by_student(student_id, db)
+    return safe_get_chats_by_student(student_id, subject_id, db)
 
 @router.delete("/delete-chat/{chat_id}")
 def delete_chat_endpoint(chat_id:int,user=Depends(require_student), db=Depends(get_db)):

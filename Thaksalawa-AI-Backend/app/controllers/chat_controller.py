@@ -4,6 +4,7 @@ from datetime import datetime,timezone,timedelta
 import requests
 
 from app.models.chat_model import ChatModel
+from app.models.subject_model import SubjectModel
 from app.database.mysql_database import get_db
 import os
 from dotenv import load_dotenv
@@ -12,9 +13,14 @@ load_dotenv()
 
 AI_SERVICE_URL = os.getenv("AI_SERVICE_URL/ai/chat-bot/ask", "http://localhost:8080/ai/chat-bot/ask")
 
-def create_chat(student_id:int,db:Session=Depends(get_db) ):
+def create_chat(student_id:int,subject_id:int,db:Session=Depends(get_db) ):
+
+    if db.query(SubjectModel).filter(SubjectModel.sub_id==subject_id).first() is None:
+        raise HTTPException(status_code=404, detail="Subject not found")
+
     chat= ChatModel(
         Student_id=student_id,
+        subject_sub_id=subject_id,
         timestamp=datetime.now(timezone.utc)+timedelta(hours=5,minutes=30)
     )
     db.add(chat)
@@ -24,7 +30,8 @@ def create_chat(student_id:int,db:Session=Depends(get_db) ):
     return {
         "chat_id": chat.chat_id,
         "student_id": chat.Student_id,
-        "timestamp": chat.timestamp
+        "timestamp": chat.timestamp,
+        "subject_id": chat.subject_sub_id
     }
 
 def send_message_to_ai(chat_id:int,query:str,source:str,db:Session=Depends(get_db)):
@@ -74,15 +81,16 @@ def delete_chat_by_id(chat_id:int,db:Session=Depends(get_db)):
     finally:
         db.close()
 
-def get_chats_by_student(student_id:int,db:Session=Depends(get_db)):
+def get_chats_by_student(student_id:int,subject_id:int,db:Session=Depends(get_db)):
     try:
-        chats= db.query(ChatModel).filter(ChatModel.Student_id==student_id).all()
+        chats= db.query(ChatModel).filter(ChatModel.Student_id==student_id, ChatModel.subject_sub_id==subject_id).all()
         result=[]
         for chat in chats:
             result.append({
                 "chat_id": chat.chat_id,
                 "student_id": chat.Student_id,
-                "timestamp": chat.timestamp
+                "timestamp": chat.timestamp,
+                "subject_id": chat.subject_sub_id
             })
         return result
     except Exception as e:

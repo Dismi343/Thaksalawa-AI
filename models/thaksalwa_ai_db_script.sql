@@ -116,22 +116,6 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`chat`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`chat` (
-  `chat_id` INT NOT NULL AUTO_INCREMENT,
-  `timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `Student_id` INT NOT NULL,
-  PRIMARY KEY (`chat_id`, `Student_id`),
-  INDEX `fk_chat_Student1_idx` (`Student_id` ASC) VISIBLE,
-  CONSTRAINT `fk_chat_Student1`
-    FOREIGN KEY (`Student_id`)
-    REFERENCES `thaksalawa-ai-db`.`student` (`student_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
 -- Table `thaksalawa-ai-db`.`pdf`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`pdf` (
@@ -156,6 +140,29 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`subject` (
   CONSTRAINT `fk_Subject_pdf1`
     FOREIGN KEY (`pdf_pdf_id`)
     REFERENCES `thaksalawa-ai-db`.`pdf` (`pdf_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`chat`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`chat` (
+  `chat_id` INT NOT NULL AUTO_INCREMENT,
+  `timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Student_id` INT NOT NULL,
+  `subject_sub_id` INT NOT NULL,
+  PRIMARY KEY (`chat_id`, `Student_id`, `subject_sub_id`),
+  INDEX `fk_chat_Student1_idx` (`Student_id` ASC) VISIBLE,
+  INDEX `fk_chat_subject1_idx` (`subject_sub_id` ASC) VISIBLE,
+  CONSTRAINT `fk_chat_Student1`
+    FOREIGN KEY (`Student_id`)
+    REFERENCES `thaksalawa-ai-db`.`student` (`student_id`),
+  CONSTRAINT `fk_chat_subject1`
+    FOREIGN KEY (`subject_sub_id`)
+    REFERENCES `thaksalawa-ai-db`.`subject` (`sub_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
