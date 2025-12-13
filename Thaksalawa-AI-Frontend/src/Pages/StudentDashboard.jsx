@@ -32,6 +32,8 @@ export default function StudentDashboard() {
   const [activeChatId, setActiveChatId] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [subjects, setSubjects] = useState([]);
+  const [chatId, setChatId] = useState(null);
+
 
  useEffect(() => {
     const fetchSubjects = async () => {
@@ -49,9 +51,13 @@ export default function StudentDashboard() {
   const renderContent = () => {
     switch (activePage) {
       case 'dashboard': return <HomeModule onNavigate={setActivePage} />;
-      case 'chat': return <ChatModule  chatId={activeChatId} selectedSubject={selectedSubject}
+      case 'chat': return <ChatModule   
+      subjects={subjects}
+      chatId={chatId}
+      setChatId={setChatId}
+      selectedSubject={selectedSubject}
       setSelectedSubject={setSelectedSubject}
-      subjects={subjects}/>;
+      />;
       case 'quiz': return <QuizPage chatId={activeChatId} />;
       case 'code': return <CodeModule />;
       case 'analytics': return <div className="p-8 text-center text-slate-500">Analytics Component Here</div>;
@@ -62,6 +68,7 @@ export default function StudentDashboard() {
   const handleNavigate = (page, chatId = null) => {
   setActivePage(page);
   setActiveChatId(chatId);
+  setChatId(chatId);
 };
 
   return (
@@ -77,6 +84,7 @@ export default function StudentDashboard() {
         setSelectedSubject={setSelectedSubject}
         subjects={subjects}
       />
+
 
       {/* Main Layout */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
@@ -126,7 +134,6 @@ export default function StudentDashboard() {
         <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar">
           {renderContent()}
         </div>
-
       </main>
     </div>
   );

@@ -12,7 +12,8 @@ import {
   X,
   Check,
   GraduationCap,
-  Icon
+  Icon,
+  Loader
 } from "lucide-react";
 
 import { GetSubjects } from "../../Api/SubjectApi";
@@ -50,31 +51,44 @@ import { CreateChat,SendMessage,GetAllMessagesByChat } from "../../Api/ChatAPi";
 //   }
 // ];
 
-const ChatModule = ({ chatId,selectedSubject, setSelectedSubject }) => {
-  const [selectedSubjectChatModule, setSelectedSubjectChatModule] = useState(null);
+const ChatModule = ({ chatId,setChatId, selectedSubject, setSelectedSubject }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isConfigOpen, setIsConfigOpen] = useState(false); // Controls the "small window"
   const endRef = useRef(null);
   const [subjects,setSubjects] = useState([]);
+  const [ loading, setLoading] = useState(false);
+  
 
 
-  const loadMessages=async(chat_id)=>{
-    try{
-      const token=localStorage.getItem('token');
-      const response=await GetAllMessagesByChat(token,chat_id);
-      setMessages(prev => [...prev, { role: "user", text: response.data.query }]);
-      setMessages(prev => [...prev, { role: "ai", text: response.data.message }]);
-      console.log(response.data);
-      if (response.data.length===0|| response.data===undefined){
-        setMessages([
-          { role: "ai", text: `I am your ${selectedSubject.name} tutor, how can I help you?` }
-        ]);
+  const loadMessages = async (chat_id) => {
+    try {
+      setMessages([]);
+      const token = localStorage.getItem('token');
+      const response = await GetAllMessagesByChat(token, chat_id);
+      const msgs = [];
+      if (Array.isArray(response.data)) {
+        response.data.forEach(m => {
+          if (m.query) {
+            msgs.push({ query: m.query });
+          
+          }
+          if (m.message) {
+            msgs.push({ message: m.message });
+            
+          }
+        });
       }
-    }catch(e){
-      console.error("Failed to load messages",e);
+      if (msgs.length === 0) {
+        msgs.push({ message: `I am your ${selectedSubject.name} tutor, how can I help you?` });
+        
+      }
+      setMessages(msgs);
+      console.log(response.data);
+    } catch (e) {
+      console.error("Failed to load messages", e);
     }
-  }
+  };
 
   useEffect(() => {
     if (chatId) {
@@ -102,38 +116,35 @@ const ChatModule = ({ chatId,selectedSubject, setSelectedSubject }) => {
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+  if (!input.trim()) return;
 
-    setMessages(prev => [...prev, { role: "user", text: input }]);
-    const userInput = input;
-    setInput("");
-     try {
+  const userInput = input;
+  setInput("");
+
+  // Add user message to messages array and userMessage state
+  setMessages(prev => [...prev, { query: userInput }]);
+
+  try {
     const token = localStorage.getItem('token');
-    // Send the message to the backend
+    setLoading(true);
     const response = await SendMessage(
       token,
       chatId,
       userInput,
       selectedSubject.file_name // source
     );
-    // Assuming the response contains the AI's reply in response.data.reply or similar
     const aiReply = response.data.message || "AI response received.";
-    setMessages(prev => [...prev, { role: "ai", text: aiReply }]);
+    // Add AI message to messages array and aimsg state
+    setMessages(prev => [...prev, { message: aiReply }]);
+    setLoading(false);
   } catch (e) {
     setMessages(prev => [
       ...prev,
-      { role: "ai", text: "Failed to send message. Please try again." }
+      { message: "Failed to send message. Please try again." }
     ]);
     console.error("Failed to send message", e);
   }
-
-    // setTimeout(() => {
-    //   setMessages(prev => [...prev, { 
-    //     role: "ai", 
-    //     text: `That's a great question about ${selectedSubject}. Let me break it down for you...` 
-    //   }]);
-    // }, 3000);
-  };
+};
 
    const loadusers=async()=>{
     try{
@@ -146,24 +157,30 @@ const ChatModule = ({ chatId,selectedSubject, setSelectedSubject }) => {
     }
   }
 
-  useEffect(()=>{
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadusers();
-  },[])
-
-
-  const handleReset = () => {
+   const handleReset = () => {
     setSelectedSubject(null);
-    setSelectedLesson(null);
+    // setSelectedLesson(null);
     setIsConfigOpen(false);
     setMessages([]);
   };
 
+  useEffect(()=>{
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    handleReset();
+    loadusers();
+  },[])
+
+
+ 
   const startChat = async(subject,sub_id)=>{
     setSelectedSubject(subject);
-    setSelectedSubjectChatModule(subject);
     const token = localStorage.getItem('token');
     const res=await CreateChat(token, sub_id);
+     if (res.data && res.data.chat_id) {
+      setChatId(res.data.chat_id);
+    }
+
+    console.log("created chat id",chatId);
     console.log(res);
   }
 
@@ -239,7 +256,7 @@ const ChatModule = ({ chatId,selectedSubject, setSelectedSubject }) => {
       )}
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-6">
+      {/* <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-6">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] md:max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap ${
@@ -252,7 +269,35 @@ const ChatModule = ({ chatId,selectedSubject, setSelectedSubject }) => {
           </div>
         ))}
         <div ref={endRef} />
+      </div> */}
+
+      <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-6">
+        {messages.map((m, i) => {
+          if (m.query) {
+            return (
+              <div key={i} className="flex justify-end">
+                <div className="max-w-[85%] md:max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap bg-[#1a4d2e] text-white rounded-br-sm">
+                  {m.query}
+                </div>
+              </div>
+            );
+          } else if (m.message) {
+            return (
+              <div key={i} className="flex justify-start">
+                <div className="max-w-[85%] md:max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap bg-white text-slate-700 rounded-bl-sm">
+                  {m.message}
+                </div>
+              </div>
+            );
+          } else {
+            return null;
+          }
+        })}
+        <div ref={endRef} />
       </div>
+
+
+    
 
       {/* Input Area */}
       <div className="p-4 bg-white border-t border-slate-100">
@@ -274,7 +319,7 @@ const ChatModule = ({ chatId,selectedSubject, setSelectedSubject }) => {
                 : "bg-slate-200 text-slate-400 cursor-not-allowed"
             }`}
           >
-            <Send size={18} />
+            {loading ? <Loader className="animate-spin" size={18} /> :<Send size={18} />}
           </button>
         </div>
       </div>
