@@ -33,7 +33,7 @@ def create_quiz_with_questions(lesson_id: int, student_id: int, num_questions: i
         # Call AI service to generate questions
         try:
             ai_response = requests.post(
-                f"{AI_SERVICE_URL}/quiz/generate-questions",
+                f"{AI_SERVICE_URL}/ai/quiz/generate-questions",
                 json={
                     "lesson_content": lesson.content,
                     "num_questions": num_questions,

@@ -33,12 +33,36 @@ def create_subject(payload):
 def get_all_subjects():
     session=SessionLocal()
     try:
-        subjects=session.query(SubjectModel).all()
-        return subjects
+        # subjects=session.query(SubjectModel).all()
+        # return subjects
+
+        results = (
+        session.query(
+            SubjectModel.sub_id,
+            SubjectModel.name,
+            SubjectModel.pdf_pdf_id,
+            PdfModel.file_name
+        )
+        .outerjoin(PdfModel, SubjectModel.pdf_pdf_id == PdfModel.pdf_id)
+        .all()
+    )
+
+        return [
+        {
+            "sub_id": r.sub_id,
+            "name": r.name,
+            "pdf_pdf_id": r.pdf_pdf_id,
+            "file_name": r.file_name
+        }
+        for r in results
+        ]
+
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error:  {str(e)}")
     finally:
         session.close()
+
+
 def get_subject_by_id(subject_id:int):
     session = SessionLocal()
     try:

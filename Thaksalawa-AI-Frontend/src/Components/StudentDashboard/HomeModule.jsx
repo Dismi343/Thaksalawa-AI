@@ -17,10 +17,88 @@ import {
   Leaf,
   ChevronRight,
   Menu,
-  X
+  X,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+
+// Convert ISO 8601 duration (PT12H37M27S) to readable format
+const formatDuration = (duration) => {
+  if (!duration) return '';
+  
+  // Match pattern: PT[nH][nM][nS]
+  const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+  const match = duration.match(regex);
+  
+  if (!match) return duration;
+  
+  const hours = match[1] ? parseInt(match[1]) : 0;
+  const minutes = match[2] ? parseInt(match[2]) : 0;
+  const seconds = match[3] ? parseInt(match[3]) : 0;
+  
+  // Return as HH:MM:SS format
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
 
 export default function HomeModule({ onNavigate }){
+
+  const [user, setUser] = useState(null);
+  const [lastLogin, setLastLogin] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+
+ useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('No token found. Please log in.');
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch('http://localhost:8080/user/dashboard', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const last_login_logs=await fetch('http://localhost:8080/user/login-logs/last-log-by-student',{
+          method: 'GET',
+          headers:{
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+
+        if (!last_login_logs.ok) {
+          throw new Error(`Error: ${last_login_logs.statusText}`);
+        }
+
+        const data = await response.json();
+        const last_login_data=await last_login_logs.json();
+        setUser(data);
+        setLastLogin(last_login_data);
+        console.log('Fetched user data:', data);
+        console.log('Fetched last login data:', last_login_data);
+      } catch (err) {
+        setError(err.message);
+        console.error('Failed to fetch user data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserData();
+  }, []);
+
+
   const ActionCard = ({ title, desc, icon: Icon, color, pageId }) => (
     <button 
       onClick={() => onNavigate(pageId)}
@@ -40,16 +118,20 @@ export default function HomeModule({ onNavigate }){
     </button>
   );
 
+  const loginTime = lastLogin?.login_time ? formatDuration(lastLogin.login_time) : 'N/A';
+  const loginDate = lastLogin?.login_date ? new Date(lastLogin.login_date).toLocaleDateString() : 'N/A';
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Hello, Student! 👋</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Hello, {user?.profile?.name || 'Student'} 👋</h1>
           <p className="text-slate-500 mt-2">Welcome back to your learning dashboard.</p>
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </div>
         <div className="bg-white px-4 py-2 rounded-full border border-slate-200 flex items-center gap-2 text-sm font-medium text-slate-600 shadow-sm whitespace-nowrap">
           <Clock size={16} className="text-green-600" />
-          <span>Last login: Today, 9:42 AM</span>
+          <span>Last login: {loginDate} at {loginTime}</span>
         </div>
       </div>
 

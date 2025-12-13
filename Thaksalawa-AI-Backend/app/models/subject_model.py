@@ -14,3 +14,4 @@ class SubjectModel(Base):
     # Relationships
     pdf = relationship("PdfModel", back_populates="subjects")
     lessons = relationship("LessonModel", back_populates="subject", cascade="all, delete-orphan")
+    chats =  relationship("ChatModel", back_populates="subject", cascade="all, delete-orphan")

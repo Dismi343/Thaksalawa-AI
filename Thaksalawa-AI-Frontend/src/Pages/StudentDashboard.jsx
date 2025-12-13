@@ -24,22 +24,52 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import { GetSubjects } from '../Api/SubjectApi.jsx';
 
 export default function StudentDashboard() {
   const [activePage, setActivePage] = useState('dashboard');
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [activeChatId, setActiveChatId] = useState(null);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [subjects, setSubjects] = useState([]);
+  const [chatId, setChatId] = useState(null);
+
+
+ useEffect(() => {
+    const fetchSubjects = async () => {
+      const token = localStorage.getItem("token");
+      const res = await GetSubjects(token);
+      setSubjects(res.data);
+    };
+    fetchSubjects();
+  }, []);
+
+ 
+
 
   // Render content based on internal state
   const renderContent = () => {
     switch (activePage) {
       case 'dashboard': return <HomeModule onNavigate={setActivePage} />;
-      case 'chat': return <ChatModule />;
-      case 'quiz': return <QuizPage onNavigate={setActivePage} />;
+      case 'chat': return <ChatModule   
+      subjects={subjects}
+      chatId={chatId}
+      setChatId={setChatId}
+      selectedSubject={selectedSubject}
+      setSelectedSubject={setSelectedSubject}
+      />;
+      case 'quiz': return <QuizPage chatId={activeChatId} />;
       case 'code': return <CodeModule />;
       case 'analytics': return <div className="p-8 text-center text-slate-500">Analytics Component Here</div>;
       default: return <HomeModule onNavigate={setActivePage} />;
     }
   };
+
+  const handleNavigate = (page, chatId = null) => {
+  setActivePage(page);
+  setActiveChatId(chatId);
+  setChatId(chatId);
+};
 
   return (
     <div className="flex h-screen bg-[#f4f7f6] font-sans text-slate-900">
@@ -47,10 +77,14 @@ export default function StudentDashboard() {
       {/* Sidebar Component */}
       <Sidebar
         activePage={activePage}
-        onNavigate={setActivePage}
+        onNavigate={handleNavigate}
         isMobileOpen={isMobileOpen}
         setIsMobileOpen={setIsMobileOpen}
+        selectedSubject={selectedSubject}
+        setSelectedSubject={setSelectedSubject}
+        subjects={subjects}
       />
+
 
       {/* Main Layout */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
@@ -100,7 +134,6 @@ export default function StudentDashboard() {
         <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 custom-scrollbar">
           {renderContent()}
         </div>
-
       </main>
     </div>
   );

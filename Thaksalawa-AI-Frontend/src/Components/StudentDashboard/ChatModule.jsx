@@ -11,87 +11,178 @@ import {
   ChevronDown,
   X,
   Check,
-  GraduationCap
+  GraduationCap,
+  Icon,
+  Loader
 } from "lucide-react";
 
-// Expanded data structure with lessons/modules
-const SUBJECTS = [
-  { 
-    id: 'math', 
-    name: 'Mathematics', 
-    icon: Calculator, 
-    color: 'bg-emerald-100 text-emerald-700',
-    greeting: "Hello! I'm your Math Tutor.",
-    lessons: ["Algebra Basics", "Geometry 101", "Calculus I", "Statistics"]
-  },
-  { 
-    id: 'science', 
-    name: 'Science', 
-    icon: Beaker, 
-    color: 'bg-blue-100 text-blue-700',
-    greeting: "Welcome! I'm your Science Assistant.",
-    lessons: ["Biology: Cell Structure", "Chemistry: Periodic Table", "Physics: Motion", "Earth Science"]
-  },
-  { 
-    id: 'history', 
-    name: 'History', 
-    icon: Globe, 
-    color: 'bg-amber-100 text-amber-700',
-    greeting: "Greetings! I'm your History Guide.",
-    lessons: ["Ancient Civilizations", "The Renaissance", "Industrial Revolution", "Modern Era"]
-  },
-  { 
-    id: 'literature', 
-    name: 'Literature', 
-    icon: BookOpen, 
-    color: 'bg-rose-100 text-rose-700',
-    greeting: "Hello! I'm your Literature Companion.",
-    lessons: ["Poetry Analysis", "Shakespearean Drama", "American Novels", "Creative Writing"]
-  }
-];
+import { GetSubjects } from "../../Api/SubjectApi";
+import { CreateChat,SendMessage,GetAllMessagesByChat } from "../../Api/ChatAPi";
 
-const ChatModule = () => {
-  const [selectedSubject, setSelectedSubject] = useState(null);
-  const [selectedLesson, setSelectedLesson] = useState(null);
+// Expanded data structure with lessons/modules
+// const SUBJECTS = [
+//   { 
+//     id: 'math', 
+//     name: 'Mathematics', 
+//     icon: Calculator, 
+//     color: 'bg-emerald-100 text-emerald-700',
+//     greeting: "Hello! I'm your Math Tutor.",
+//   },
+//   { 
+//     id: 'science', 
+//     name: 'Science', 
+//     icon: Beaker, 
+//     color: 'bg-blue-100 text-blue-700',
+//     greeting: "Welcome! I'm your Science Assistant.",
+//   },
+//   { 
+//     id: 'history', 
+//     name: 'History', 
+//     icon: Globe, 
+//     color: 'bg-amber-100 text-amber-700',
+//     greeting: "Greetings! I'm your History Guide.",
+//   },
+//   { 
+//     id: 'literature', 
+//     name: 'Literature', 
+//     icon: BookOpen, 
+//     color: 'bg-rose-100 text-rose-700',
+//     greeting: "Hello! I'm your Literature Companion.",
+//   }
+// ];
+
+const ChatModule = ({ chatId,setChatId, selectedSubject, setSelectedSubject }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isConfigOpen, setIsConfigOpen] = useState(false); // Controls the "small window"
   const endRef = useRef(null);
+  const [subjects,setSubjects] = useState([]);
+  const [ loading, setLoading] = useState(false);
+  
+
+
+  const loadMessages = async (chat_id) => {
+    try {
+      setMessages([]);
+      const token = localStorage.getItem('token');
+      const response = await GetAllMessagesByChat(token, chat_id);
+      const msgs = [];
+      if (Array.isArray(response.data)) {
+        response.data.forEach(m => {
+          if (m.query) {
+            msgs.push({ query: m.query });
+          
+          }
+          if (m.message) {
+            msgs.push({ message: m.message });
+            
+          }
+        });
+      }
+      if (msgs.length === 0) {
+        msgs.push({ message: `I am your ${selectedSubject.name} tutor, how can I help you?` });
+        
+      }
+      setMessages(msgs);
+      console.log(response.data);
+    } catch (e) {
+      console.error("Failed to load messages", e);
+    }
+  };
+
+  useEffect(() => {
+    if (chatId) {
+      // Fetch messages for chatId here
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadMessages(chatId);
+      console.log("Load messages for chat ID:", chatId);
+    }
+  }, [chatId]);
 
   // Initialize chat when lesson is selected
-  useEffect(() => {
-    if (selectedSubject && selectedLesson) {
-      setMessages([
-        { role: "ai", text: `${selectedSubject.greeting} Ready to start the module on **${selectedLesson}**?` }
-      ]);
-    }
-  }, [selectedLesson, selectedSubject]);
+  // useEffect(() => {
+  //   if (selectedSubject) {
+
+  //     setMessages([
+  //       { role: "ai", text: `I am your ${selectedSubject.name} tutor, how can I help you?` }
+  //     ]);
+  //   }
+    
+  // }, [selectedSubject]);
 
   // Auto-scroll
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+  if (!input.trim()) return;
 
-    setMessages(prev => [...prev, { role: "user", text: input }]);
-    setInput("");
+  const userInput = input;
+  setInput("");
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: "ai", 
-        text: `That's a great question about ${selectedLesson}. Let me break it down for you...` 
-      }]);
-    }, 1000);
-  };
+  // Add user message to messages array and userMessage state
+  setMessages(prev => [...prev, { query: userInput }]);
 
-  const handleReset = () => {
+  try {
+    const token = localStorage.getItem('token');
+    setLoading(true);
+    const response = await SendMessage(
+      token,
+      chatId,
+      userInput,
+      selectedSubject.file_name // source
+    );
+    const aiReply = response.data.message || "AI response received.";
+    // Add AI message to messages array and aimsg state
+    setMessages(prev => [...prev, { message: aiReply }]);
+    setLoading(false);
+  } catch (e) {
+    setMessages(prev => [
+      ...prev,
+      { message: "Failed to send message. Please try again." }
+    ]);
+    console.error("Failed to send message", e);
+  }
+};
+
+   const loadusers=async()=>{
+    try{
+      const token=localStorage.getItem('token');
+      const response=await GetSubjects(token);
+      setSubjects(response.data);
+      console.log(response.data);
+    }catch(e){
+      console.error("Failed to load subjects",e);
+    }
+  }
+
+   const handleReset = () => {
     setSelectedSubject(null);
-    setSelectedLesson(null);
+    // setSelectedLesson(null);
     setIsConfigOpen(false);
     setMessages([]);
   };
+
+  useEffect(()=>{
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    handleReset();
+    loadusers();
+  },[])
+
+
+ 
+  const startChat = async(subject,sub_id)=>{
+    setSelectedSubject(subject);
+    const token = localStorage.getItem('token');
+    const res=await CreateChat(token, sub_id);
+     if (res.data && res.data.chat_id) {
+      setChatId(res.data.chat_id);
+    }
+
+    console.log("created chat id",chatId);
+    console.log(res);
+  }
 
   // --- VIEW 1: Subject Selection ---
   if (!selectedSubject) {
@@ -106,20 +197,19 @@ const ChatModule = () => {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
-          {SUBJECTS.map((subject) => {
-            const Icon = subject.icon;
+          {subjects.map((subject) => {
+            
             return (
               <button
-                key={subject.id}
-                onClick={() => setSelectedSubject(subject)}
+                key={subject.sub_id}
+                onClick={() => startChat(subject,subject.sub_id)}
                 className="flex items-center gap-4 p-6 rounded-2xl border border-slate-100 hover:border-emerald-500/30 hover:shadow-md transition-all group bg-slate-50 hover:bg-white text-left"
               >
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${subject.color} group-hover:scale-110 transition-transform`}>
-                  <Icon size={24} />
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center  group-hover:scale-110 transition-transform`}>
+                 
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-800 group-hover:text-[#1a4d2e] transition-colors">{subject.name}</h3>
-                  <p className="text-xs text-slate-400">{subject.lessons.length} Modules Available</p>
                 </div>
               </button>
             );
@@ -130,43 +220,7 @@ const ChatModule = () => {
   }
 
   // --- VIEW 2: Lesson/Module Selection ---
-  if (!selectedLesson) {
-    return (
-      <div className="h-[calc(100vh-8rem)] flex flex-col items-center justify-center bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-        <div className="w-full max-w-xl">
-          <button 
-            onClick={() => setSelectedSubject(null)}
-            className="flex items-center gap-2 text-slate-400 hover:text-slate-600 mb-6 transition-colors text-sm font-medium"
-          >
-            <ChevronLeft size={16} /> Back to Subjects
-          </button>
-
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-              <span className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedSubject.color}`}>
-                {React.createElement(selectedSubject.icon, { size: 16 })}
-              </span>
-              {selectedSubject.name} Modules
-            </h2>
-            <p className="text-slate-500 mt-1">Select a specific learning module to begin</p>
-          </div>
-
-          <div className="space-y-3">
-            {selectedSubject.lessons.map((lesson, idx) => (
-              <button
-                key={idx}
-                onClick={() => setSelectedLesson(lesson)}
-                className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-emerald-500/30 hover:bg-slate-50 transition-all group text-left"
-              >
-                <span className="font-medium text-slate-700 group-hover:text-[#1a4d2e]">{lesson}</span>
-                <ChevronLeft size={16} className="rotate-180 text-slate-300 group-hover:text-emerald-500 transition-colors" />
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+ 
 
   // --- VIEW 3: Chat Interface ---
   return (
@@ -180,71 +234,18 @@ const ChatModule = () => {
             onClick={() => setIsConfigOpen(true)}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 transition-colors group border border-transparent hover:border-slate-200"
           >
-            <span className={`w-5 h-5 rounded-md flex items-center justify-center ${selectedSubject.color} text-xs`}>
-              {React.createElement(selectedSubject.icon, { size: 12 })}
+            <span className={`w-5 h-5 rounded-md flex items-center justify-center  text-xs`}> 
+              {/* ${selectedSubject.color} */}
+              {/* {React.createElement(selectedSubject.icon, { size: 12 })} */}
             </span>
             <div className="flex flex-col items-start leading-none">
               <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">{selectedSubject.name}</span>
-              <span className="text-sm font-bold flex items-center gap-1">
-                {selectedLesson}
-                <ChevronDown size={14} className="text-slate-400 group-hover:text-slate-600" />
-              </span>
             </div>
-          </button>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> 
-          <button className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
-            <MoreVertical size={20} />
           </button>
         </div>
       </div>
 
-      {/* Configuration Modal ("Small Window") */}
-      {isConfigOpen && (
-        <div className="absolute top-[60px] left-4 z-50 w-80 bg-white rounded-xl shadow-xl border border-slate-200 animate-in fade-in slide-in-from-top-2 duration-200 p-2">
-           <div className="flex justify-between items-center px-3 py-2 border-b border-slate-100 mb-2">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Switch Module</span>
-              <button 
-                onClick={() => setIsConfigOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X size={16} />
-              </button>
-           </div>
-           
-           <div className="space-y-1 max-h-60 overflow-y-auto">
-             {selectedSubject.lessons.map((lesson) => (
-               <button
-                  key={lesson}
-                  onClick={() => {
-                    setSelectedLesson(lesson);
-                    setIsConfigOpen(false);
-                    setMessages([{ role: "ai", text: `Switched to **${lesson}**. How can I help?` }]);
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between ${
-                    selectedLesson === lesson 
-                      ? "bg-emerald-50 text-emerald-700 font-medium" 
-                      : "text-slate-600 hover:bg-slate-50"
-                  }`}
-               >
-                 {lesson}
-                 {selectedLesson === lesson && <Check size={14} />}
-               </button>
-             ))}
-           </div>
-
-           <div className="mt-2 pt-2 border-t border-slate-100">
-              <button 
-                onClick={handleReset}
-                className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-red-600 flex items-center gap-2 transition-colors"
-              >
-                <ChevronLeft size={14} /> Change Subject
-              </button>
-           </div>
-        </div>
-      )}
+    
 
       {/* Modal Backdrop (Click to close) */}
       {isConfigOpen && (
@@ -255,7 +256,7 @@ const ChatModule = () => {
       )}
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-6">
+      {/* <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-6">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] md:max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap ${
@@ -268,7 +269,35 @@ const ChatModule = () => {
           </div>
         ))}
         <div ref={endRef} />
+      </div> */}
+
+      <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-6">
+        {messages.map((m, i) => {
+          if (m.query) {
+            return (
+              <div key={i} className="flex justify-end">
+                <div className="max-w-[85%] md:max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap bg-[#1a4d2e] text-white rounded-br-sm">
+                  {m.query}
+                </div>
+              </div>
+            );
+          } else if (m.message) {
+            return (
+              <div key={i} className="flex justify-start">
+                <div className="max-w-[85%] md:max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap bg-white text-slate-700 rounded-bl-sm">
+                  {m.message}
+                </div>
+              </div>
+            );
+          } else {
+            return null;
+          }
+        })}
+        <div ref={endRef} />
       </div>
+
+
+    
 
       {/* Input Area */}
       <div className="p-4 bg-white border-t border-slate-100">
@@ -290,7 +319,7 @@ const ChatModule = () => {
                 : "bg-slate-200 text-slate-400 cursor-not-allowed"
             }`}
           >
-            <Send size={18} />
+            {loading ? <Loader className="animate-spin" size={18} /> :<Send size={18} />}
           </button>
         </div>
       </div>

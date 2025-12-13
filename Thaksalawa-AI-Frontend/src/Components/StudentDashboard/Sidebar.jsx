@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { 
   LayoutGrid, MessageSquareText, GraduationCap, PieChart, 
-  Code, Settings, LogOut, X, ArrowLeft, Plus, History 
+  Code, Settings, LogOut, X, ArrowLeft, Plus, History ,Trash2
 } from "lucide-react";
 import axios from "axios";
+import { GetChats, DeleteChat,GetAllMessagesByChat } from "../../Api/ChatAPi";
+
 // 1. Mock Data for History (In a real app, fetch this from an API)
 const HISTORY_DATA = {
   chat: [
-    { id: 1, title: "Biology Revision 101", date: "Today" },
-    { id: 2, title: "Calculus Problem Help", date: "Yesterday" },
-    { id: 3, title: "Essay Structure Ideas", date: "2 days ago" },
+    { id:1, firstMessage:"Select a subject to display chat history"}
   ],
   quiz: [
     { id: 1, title: "Organic Chemistry", score: "85%" },
@@ -22,7 +22,55 @@ const HISTORY_DATA = {
   ]
 };
 
-const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen }) => {
+const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen, selectedSubject, setSelectedSubject,subjects }) => {
+
+  const[historyData,setHistoryData]=React.useState(HISTORY_DATA);
+
+
+  const fetchChatHistory = async(token,key,selectedSubject)=>{
+      try{
+        const subject_id=selectedSubject.sub_id;
+        const res=await GetChats(token,subject_id);
+        const chatsWithFirstMessage = await Promise.all(
+        res.data.map(async (chat) => {
+          const chat_id = chat.chat_id;
+          const allMessages = await GetAllMessagesByChat(token, chat_id);
+          const firstMessage = allMessages.data && allMessages.data.length > 0 ? allMessages.data[0] : null;
+          console.log("First message for chat", chat_id, ":", firstMessage,":",selectedSubject);
+          // Add firstMessage as a property to the chat object
+          return { ...chat, firstMessage: firstMessage ? firstMessage.query : null };
+          })
+        );
+        setHistoryData(prev=>({
+          ...prev,
+          [key]:chatsWithFirstMessage
+        }))
+        console.log(chatsWithFirstMessage);
+
+      }
+      catch(e){
+        console.log(e);
+      }
+  }
+
+useEffect(()=>{
+  const token=localStorage.getItem("token");
+  let key=null;
+
+  if (activePage === 'chat') {
+        key="chat";
+        fetchChatHistory(token,key,selectedSubject)
+        console.log("fetch chat history");
+      } else if (activePage === 'quiz') {
+        key="quiz";
+       return;//add nesseccary fetchdata method
+      } else if (activePage === 'code') {
+        key="code";
+       return;//add nesseccary fetchdata method
+      }
+},[activePage, selectedSubject]);
+
+
 
   const handleLogout = async () => {
     try {
@@ -34,7 +82,7 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen }) => {
         return;
       }
 
-      await axios.post("http://127.0.0.1:8000/logout", {}, {
+      await axios.post("http://localhost:8080/user/logout", {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -52,6 +100,19 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen }) => {
       window.location.href = "/";
     }
   };
+
+
+  const handleDeleteChat = async (chatId, subject_id) => {
+  try {
+    const token = localStorage.getItem("token");
+    await DeleteChat(token, chatId);
+    // Refresh chat history after deletion
+    fetchChatHistory(token, "chat", { sub_id: subject_id });
+  } catch (e) {
+    console.error("Failed to delete chat", e);
+    alert("Failed to delete chat.");
+  }
+};
   
   // Helper to determine if we are in a "History Mode" page
   const isHistoryPage = ['chat', 'quiz', 'code'].includes(activePage);
@@ -70,7 +131,7 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen }) => {
 
   // 3. Component for the History List (Chat/Quiz/Code)
   const HistoryMenu = () => {
-    const historyItems = HISTORY_DATA[activePage] || [];
+    const historyItems = historyData[activePage] || [];
     
     // Dynamic labels based on page
     const labels = {
@@ -97,7 +158,9 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen }) => {
           </span>
         </div>
 
-        <button className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-green-200 text-[#1a4d2e] hover:bg-green-50 transition-all mb-4">
+        <button className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-green-200 text-[#1a4d2e] hover:bg-green-50 transition-all mb-4"
+        onClick={() => setSelectedSubject(null)}
+        >
           <Plus size={18} />
           <span className="font-medium text-sm">{labels[activePage]?.new}</span>
         </button>
@@ -105,16 +168,36 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen }) => {
         {/* Scrollable History List */}
         <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-300px)] pr-1 custom-scrollbar">
           {historyItems.map((item) => (
-            <button 
-              key={item.id}
-              className="flex flex-col items-start gap-1 w-full p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-[#1a4d2e] transition-all text-left group"
-            >
-              <span className="font-medium text-sm truncate w-full">{item.title}</span>
-              <span className="text-xs text-slate-400 group-hover:text-green-600/70">
-                {item.date || item.score || item.lang}
-              </span>
-            </button>
+            <div
+                key={item.id || item.chat_id}
+                className="flex items-center w-full group"
+              >
+                <button
+                  className="flex flex-col items-start gap-1 flex-1 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-[#1a4d2e] transition-all text-left"
+                  onClick={() => {
+                    const subject = subjects.find(s => s.sub_id === item.subject_id);
+                    setSelectedSubject(subject);
+                    onNavigate('chat', item.chat_id);
+                  }}
+                >
+                  <span className="font-medium text-sm truncate w-full">{item?.firstMessage || "No topic"}</span>
+                  <span className="text-xs text-slate-400 group-hover:text-green-600/70">
+                    {item?.date || item?.score || item?.lang || item?.timestamp || 'No additional info'}
+                  </span>
+                </button>
+                <button
+                  className="ml-2 p-2 rounded hover:bg-red-100 text-red-500"
+                  title="Delete chat"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    await handleDeleteChat(item.chat_id, selectedSubject?.sub_id);
+                  }}
+                >
+                  <Trash2 size={18} />
+                </button>
+            </div>
           ))}
+          
           
           {historyItems.length === 0 && (
             <div className="text-center p-4 text-slate-400 text-sm">

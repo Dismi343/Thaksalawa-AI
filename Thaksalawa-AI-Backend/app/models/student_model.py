@@ -29,3 +29,4 @@ class StudentModel(Base):
     
     quizzes = relationship("QuizModel", back_populates="student", cascade="all, delete-orphan")
     answers = relationship("StudentAnswerModel", back_populates="student", cascade="all, delete-orphan")
+    chats = relationship("ChatModel", back_populates="student", cascade="all, delete-orphan")
