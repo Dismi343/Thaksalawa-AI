@@ -113,6 +113,14 @@ useEffect(()=>{
     alert("Failed to delete chat.");
   }
 };
+
+const onRefreshStatusBar=()=>{
+  historyData["chat"].length=0;
+  setHistoryData(prev=>({
+    ...prev,
+    ["chat"]:[]
+  }))
+}
   
   // Helper to determine if we are in a "History Mode" page
   const isHistoryPage = ['chat', 'quiz', 'code'].includes(activePage);
@@ -144,7 +152,9 @@ useEffect(()=>{
       <div className="space-y-4 animate-in fade-in slide-in-from-right-5 duration-300">
         {/* Back Button */}
         <button 
-          onClick={() => onNavigate('dashboard')}
+          onClick={() => {onNavigate('dashboard');
+                onRefreshStatusBar();
+          }}
           className="flex items-center gap-2 text-slate-500 hover:text-[#1a4d2e] transition-colors px-2 mb-4"
         >
           <ArrowLeft size={16} />
@@ -159,7 +169,9 @@ useEffect(()=>{
         </div>
 
         <button className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-green-200 text-[#1a4d2e] hover:bg-green-50 transition-all mb-4"
-        onClick={() => setSelectedSubject(null)}
+        onClick={() => {setSelectedSubject(null);
+          onRefreshStatusBar();
+        }}
         >
           <Plus size={18} />
           <span className="font-medium text-sm">{labels[activePage]?.new}</span>
