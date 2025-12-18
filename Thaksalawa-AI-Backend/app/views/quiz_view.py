@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
+from app.auth.auth_config import get_current_active_user
 from app.services.quiz_service import (
     safe_create_quiz,
     safe_get_quiz,
@@ -6,13 +7,17 @@ from app.services.quiz_service import (
     safe_get_quiz_progress,
     safe_finish_quiz,
     safe_get_quiz_results,
-    safe_get_student_quiz_history
+    safe_get_student_quiz_history,
+    safe_get_quize_by_student
 )
 from app.schema.quiz_schema import (
     CreateQuizRequest,
     SubmitAnswerRequest,
-    FinishQuizRequest
+    FinishQuizRequest,
+    ResponseQuizList
 )
+from typing import Annotated
+
 
 router = APIRouter(
     prefix="/quizzes",
@@ -20,13 +25,14 @@ router = APIRouter(
 )
 
 @router.post('/create')
-def create_quiz_endpoint(request: CreateQuizRequest):
+def create_quiz_endpoint(request: CreateQuizRequest , current_user : Annotated[dict,Depends(get_current_active_user)]):
     """
     Create a new quiz with AI-generated questions
     """
+    student_id=current_user['profile']['id']
     return safe_create_quiz(
         lesson_id=request.lesson_id,
-        student_id=request.student_id,
+        student_id=student_id,
         num_questions=request.num_questions,
         question_type=request.question_type,
         title=request.title
@@ -79,3 +85,11 @@ def get_student_quiz_history_endpoint(student_id: int):
     Get all quizzes taken by a student
     """
     return safe_get_student_quiz_history(student_id)
+
+@router.get('/student-quizes',response_model=list[ResponseQuizList])
+def get_quize_by_student_endpoint(current_user : Annotated[dict,Depends(get_current_active_user)]):
+    """
+    Get all quizzes taken by a student
+    """
+    student_id = current_user['profile']['id']
+    return safe_get_quize_by_student(student_id)

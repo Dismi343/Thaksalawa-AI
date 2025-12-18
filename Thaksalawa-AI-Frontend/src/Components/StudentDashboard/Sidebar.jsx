@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { GetChats, DeleteChat,GetAllMessagesByChat } from "../../Api/ChatAPi";
+import { GetQuize } from "../../Api/QuizApi";
 
 // 1. Mock Data for History (In a real app, fetch this from an API)
 const HISTORY_DATA = {
@@ -12,8 +13,7 @@ const HISTORY_DATA = {
     { id:1, firstMessage:"Select a subject to display chat history"}
   ],
   quiz: [
-    { id: 1, title: "Organic Chemistry", score: "85%" },
-    { id: 2, title: "World History", score: "92%" },
+    { id: 1, title: "Organic Chemistry", score: "85%" }
   ],
   code: [
     { id: 1, title: "Python Sort Algo", lang: "py" },
@@ -53,16 +53,30 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen, select
       }
   }
 
+  const fetchQuizeHistory = async(token,key)=>{
+    
+    try{
+      const res=await GetQuize(token);
+      console.log(res.data);
+      setHistoryData(prev=>({
+        ...prev,
+        [key]:res.data
+      }))
+    }catch(e){
+      console.log(e);
+    }
+  }
+
 useEffect(()=>{
   const token=localStorage.getItem("token");
   let key=null;
-
   if (activePage === 'chat') {
         key="chat";
         fetchChatHistory(token,key,selectedSubject)
         console.log("fetch chat history");
       } else if (activePage === 'quiz') {
         key="quiz";
+        fetchQuizeHistory(token,key);//add nesseccary fetchdata method
        return;//add nesseccary fetchdata method
       } else if (activePage === 'code') {
         key="code";
@@ -181,21 +195,39 @@ const onRefreshStatusBar=()=>{
         <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-300px)] pr-1 custom-scrollbar">
           {historyItems.map((item) => (
             <div
-                key={item.id || item.chat_id}
+                key={item.id || item.chat_id || item.quiz_id}
                 className="flex items-center w-full group"
               >
                 <button
                   className="flex flex-col items-start gap-1 flex-1 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-[#1a4d2e] transition-all text-left"
                   onClick={() => {
+                    if(activePage==="chat"){
                     const subject = subjects.find(s => s.sub_id === item.subject_id);
                     setSelectedSubject(subject);
                     onNavigate('chat', item.chat_id);
+                    }
                   }}
                 >
-                  <span className="font-medium text-sm truncate w-full">{item?.firstMessage || "No topic"}</span>
+                  <span className="font-medium text-sm truncate w-full">{item?.firstMessage || item?.title ||"No topic"}</span>
                   <span className="text-xs text-slate-400 group-hover:text-green-600/70">
-                    {item?.date || item?.score || item?.lang || item?.timestamp || 'No additional info'}
+                    {item?.date
+                      ? new Date(item.date).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })
+                      : item?.timestamp
+                      ? new Date(item.timestamp).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })
+                      : item?.created_at
+                      ? new Date(item.created_at).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })
+                      : item?.score || item?.lang || "No additional info"}
                   </span>
+
                 </button>
                 <button
                   className="ml-2 p-2 rounded hover:bg-red-100 text-red-500"

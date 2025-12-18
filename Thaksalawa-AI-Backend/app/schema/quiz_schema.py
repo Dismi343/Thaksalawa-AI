@@ -5,7 +5,6 @@ from datetime import time, datetime
 # Request Schemas
 class CreateQuizRequest(BaseModel):
     lesson_id: int
-    student_id: int
     num_questions: int
     question_type: str  # "mcq" or "short"
     title: Optional[str] = None
@@ -92,3 +91,9 @@ class QuizProgressResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class ResponseQuizList(BaseModel):
+    quiz_id:int
+    score:int |Optional[None]
+    title:str
+    created_at:datetime
