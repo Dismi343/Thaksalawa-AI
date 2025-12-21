@@ -204,8 +204,13 @@ export default function QuizModule({activePage,setActivePage,quizState,setQuizSt
       const answerData=new FormData();
       answerData.append('quiz_id',quizId);
       answerData.append('question_id',quizQuestionData.questions[currentQuestionIndex].question_id);
-      answerData.append('selected_option',(selectedAnswers[currentQuestionIndex] || 0) ); // Convert 0-3 to 1-4 for API
-      answerData.append('written_answer','');
+        if (quizState.quizeType === 'mcq') {
+        answerData.append('selected_option', (selectedAnswers[currentQuestionIndex] || 0));
+        answerData.append('written_answer', '');
+      } else if (quizState.quizeType === 'short') {
+        answerData.append('selected_option', 0); // Not applicable for short answer
+        answerData.append('written_answer', selectedAnswers[currentQuestionIndex] || '');
+      }
 
       console.log('submitting answer',{
         quiz_id: answerData.get('quiz_id'),
@@ -227,6 +232,7 @@ export default function QuizModule({activePage,setActivePage,quizState,setQuizSt
     //finishing the quiz function
     //---------------------------------------------------------------------------------------------
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const finishQuiz=async()=>{
         try{
           const token= localStorage.getItem('token');
