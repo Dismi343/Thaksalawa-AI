@@ -10,7 +10,7 @@ import { GetQuize } from "../../Api/QuizApi";
 // 1. Mock Data for History (In a real app, fetch this from an API)
 const HISTORY_DATA = {
   chat: [
-    { id:1, firstMessage:"Select a subject to display chat history"}
+   
   ],
   quiz: [
     { id: 1, title: "Organic Chemistry", score: "85%" }
@@ -22,11 +22,12 @@ const HISTORY_DATA = {
   ]
 };
 
-const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen, selectedSubject, setSelectedSubject,subjects }) => {
+const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen, selectedSubject, setSelectedSubject,  setQuizState }) => {
 
   const[historyData,setHistoryData]=React.useState(HISTORY_DATA);
 
 
+  
   const fetchChatHistory = async(token,key,selectedSubject)=>{
       try{
         const subject_id=selectedSubject.sub_id;
@@ -39,7 +40,7 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen, select
           console.log("First message for chat", chat_id, ":", firstMessage,":",selectedSubject);
           // Add firstMessage as a property to the chat object
           return { ...chat, firstMessage: firstMessage ? firstMessage.query : null };
-          })
+          })  
         );
         setHistoryData(prev=>({
           ...prev,
@@ -53,6 +54,13 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen, select
       }
   }
 
+
+   // Helper functions to update quizState
+  const updateQuizState = (key, value) => {
+    setQuizState(prev => ({ ...prev, [key]: value }));
+  };
+
+  
   const fetchQuizeHistory = async(token,key)=>{
     
     try{
@@ -76,8 +84,8 @@ useEffect(()=>{
         console.log("fetch chat history");
       } else if (activePage === 'quiz') {
         key="quiz";
-        fetchQuizeHistory(token,key);//add nesseccary fetchdata method
-       return;//add nesseccary fetchdata method
+        fetchQuizeHistory(token,key);
+       return;
       } else if (activePage === 'code') {
         key="code";
        return;//add nesseccary fetchdata method
@@ -128,12 +136,43 @@ useEffect(()=>{
   }
 };
 
+  // const updateQuizState = (key, value) => {
+  //   setQuizState(prev => ({ ...prev, [key]: value }));
+  // };
+
+    // reset quizState
+  const resetQuizState = () => {
+  setQuizState({
+    selectedSubject: null,
+    selectedlesson: null,
+    quizeFrom: null,
+    quizeType: null,
+    quizeTime: null,
+    questionCount: 0
+  });
+};
+
 const onRefreshStatusBar=()=>{
+  if(activePage==="chat"){
   historyData["chat"].length=0;
   setHistoryData(prev=>({
     ...prev,
     ["chat"]:[]
   }))
+
+  }
+
+
+  if(activePage==="quiz"){
+    historyData["quiz"].length=0;
+  setHistoryData(prev=>({
+    ...prev,
+    ["quiz"]:[]
+  }))
+  }
+  resetQuizState();
+  setSelectedSubject(null);
+
 }
   
   // Helper to determine if we are in a "History Mode" page
@@ -202,9 +241,13 @@ const onRefreshStatusBar=()=>{
                   className="flex flex-col items-start gap-1 flex-1 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-[#1a4d2e] transition-all text-left"
                   onClick={() => {
                     if(activePage==="chat"){
-                    const subject = subjects.find(s => s.sub_id === item.subject_id);
+                    const subject = { sub_id: item.subject_id };
                     setSelectedSubject(subject);
                     onNavigate('chat', item.chat_id);
+                    }
+                    else if(activePage==="quiz"){
+                    updateQuizState('quizId', item.quiz_id);
+                    onNavigate('quiz', item.quiz_id);
                     }
                   }}
                 >
@@ -229,16 +272,18 @@ const onRefreshStatusBar=()=>{
                   </span>
 
                 </button>
-                <button
-                  className="ml-2 p-2 rounded hover:bg-red-100 text-red-500"
-                  title="Delete chat"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    await handleDeleteChat(item.chat_id, selectedSubject?.sub_id);
-                  }}
-                >
-                  <Trash2 size={18} />
-                </button>
+                {activePage === 'chat' && (
+                  <button
+                    className="ml-2 p-2 rounded hover:bg-red-100 text-red-500"
+                    title="Delete chat"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      await handleDeleteChat(item.chat_id, selectedSubject?.sub_id);
+                    }}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
             </div>
           ))}
           

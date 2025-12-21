@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../Components/StudentDashboard/Sidebar.jsx';
 import HomeModule from '../Components/StudentDashboard/HomeModule.jsx';
 import QuizPage from "./QuizPage.jsx";
@@ -30,10 +30,19 @@ import { GetSubjects } from '../Api/SubjectApi.jsx';
 export default function StudentDashboard() {
   const [activePage, setActivePage] = useState('dashboard');
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [activeChatId, setActiveChatId] = useState(null);
+  // const [activeChatId, setActiveChatId] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [subjects, setSubjects] = useState([]);
   const [chatId, setChatId] = useState(null);
+const [quizState, setQuizState] = useState({
+  selectedSubject: null,
+  selectedlesson: null,
+  quizeFrom: null,
+  quizeType: null,
+  quizeTime: null,
+  questionCount: 0,
+  quizId: null
+});
 
 
  useEffect(() => {
@@ -65,7 +74,10 @@ export default function StudentDashboard() {
       setSelectedSubject={setSelectedSubject}
       activePage={activePage}
       setActivePage={setActivePage}
-
+      setQuizState={setQuizState}
+      quizState={quizState}
+      quizId={quizState.quizId}
+      setQuizId={(value) => updateQuizState('quizId', value)}
         />;
       case 'code': return <CodeModule />;
       case 'analytics': return <div className="p-8 text-center text-slate-500">Analytics Component Here</div>;
@@ -73,17 +85,40 @@ export default function StudentDashboard() {
     }
   };
 
-  const handleNavigate = (page, chatId = null) => {
+  // Helper functions to update quizState
+  const updateQuizState = (key, value) => {
+    setQuizState(prev => ({ ...prev, [key]: value }));
+  };
+
+  // reset quizState
+  const resetQuizState = () => {
+  setQuizState({
+    selectedSubject: null,
+    selectedlesson: null,
+    quizeFrom: null,
+    quizeType: null,
+    quizeTime: null,
+    questionCount: 0
+  });
+};
+
+  const handleNavigate = (page, id = null) => {
   
   setActivePage(page);
-  setActiveChatId(chatId);
-  setChatId(chatId);
+  if (page === 'chat') {
+    setChatId(id);
+  } else if (page === 'quiz') {
+    updateQuizState('quizId', id);
+  }
 };
 
 const backtoDashboard=()=>{
   setActivePage('dashboard')
   setSelectedSubject(null);
+ resetQuizState();
 }
+
+
 
   return (
     <div className="flex h-screen bg-[#f4f7f6] font-sans text-slate-900">
@@ -97,6 +132,9 @@ const backtoDashboard=()=>{
         selectedSubject={selectedSubject}
         setSelectedSubject={setSelectedSubject}
         subjects={subjects}
+        setQuizState={setQuizState}
+        quizState={quizState}
+        
       />
 
 

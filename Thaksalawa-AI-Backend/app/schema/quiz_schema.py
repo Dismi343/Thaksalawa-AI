@@ -12,7 +12,6 @@ class CreateQuizRequest(BaseModel):
 class SubmitAnswerRequest(BaseModel):
     quiz_id: int
     question_id: int
-    student_id: int
     # For MCQ
     selected_option: Optional[int] = None
     # For Short Answer
@@ -20,7 +19,6 @@ class SubmitAnswerRequest(BaseModel):
 
 class FinishQuizRequest(BaseModel):
     quiz_id: int
-    student_id: int
 
 # Response Schemas
 class MCQOptionResponse(BaseModel):

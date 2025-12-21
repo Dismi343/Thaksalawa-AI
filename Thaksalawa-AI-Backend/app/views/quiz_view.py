@@ -38,45 +38,51 @@ def create_quiz_endpoint(request: CreateQuizRequest , current_user : Annotated[d
         title=request.title
     )
 
-@router.get('/get/{quiz_id}/student/{student_id}')
-def get_quiz_endpoint(quiz_id: int, student_id: int):
+@router.get('/get/{quiz_id}/student')
+def get_quiz_endpoint(quiz_id: int, current_user : Annotated[dict,Depends(get_current_active_user)]):
     """
     Get quiz details with questions (before completion - no answers shown)
     """
+    student_id=current_user['profile']['id']
     return safe_get_quiz(quiz_id, student_id)
 
 @router.post('/submit-answer')
-def submit_answer_endpoint(request: SubmitAnswerRequest):
+def submit_answer_endpoint(request: SubmitAnswerRequest, current_user : Annotated[dict,Depends(get_current_active_user)] ):
+
     """
     Submit or update an answer for a specific question
     """
+    student_id=current_user['profile']['id']
     return safe_submit_answer(
         quiz_id=request.quiz_id,
         question_id=request.question_id,
-        student_id=request.student_id,
+        student_id=student_id,
         selected_option=request.selected_option,
         written_answer=request.written_answer
     )
 
-@router.get('/progress/{quiz_id}/student/{student_id}')
-def get_quiz_progress_endpoint(quiz_id: int, student_id: int):
+@router.get('/progress/{quiz_id}/student')
+def get_quiz_progress_endpoint(quiz_id: int, current_user : Annotated[dict,Depends(get_current_active_user)]):
     """
     Get current progress of quiz (how many questions answered)
     """
+    student_id = current_user['profile']['id']
     return safe_get_quiz_progress(quiz_id, student_id)
 
 @router.post('/finish')
-def finish_quiz_endpoint(request: FinishQuizRequest):
+def finish_quiz_endpoint(request: FinishQuizRequest,current_user : Annotated[dict,Depends(get_current_active_user)]):
     """
     Finish quiz and calculate final score (SAVES SCORE TO DATABASE)
     """
-    return safe_finish_quiz(request.quiz_id, request.student_id)
+    student_id = current_user['profile']['id']
+    return safe_finish_quiz(request.quiz_id, student_id)
 
-@router.get('/results/{quiz_id}/student/{student_id}')
-def get_quiz_results_endpoint(quiz_id: int, student_id: int):
+@router.get('/results/{quiz_id}/student')
+def get_quiz_results_endpoint(quiz_id: int, current_user : Annotated[dict,Depends(get_current_active_user)]):
     """
     Get detailed quiz results with correct answers and explanations
     """
+    student_id = current_user['profile']['id']
     return safe_get_quiz_results(quiz_id, student_id)
 
 @router.get('/history/student/{student_id}')
