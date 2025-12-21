@@ -484,3 +484,26 @@ def get_student_quiz_history(student_id: int):
         raise HTTPException(status_code=500, detail="Database error")
     finally:
         session.close()
+
+def get_quize_by_student(student_id:int):
+    """Get all quizzes taken by a student"""
+    session = SessionLocal()
+    try:
+        quizzes = session.query(QuizModel).filter_by(Student_id=student_id).order_by(
+            QuizModel.created_at.desc()
+        ).all()
+        
+        quiz_list=[]
+        for quiz in quizzes:
+            quiz_list.append({
+                "quiz_id":quiz.quiz_id,
+                "score":quiz.score,
+                "title":quiz.title,
+                "created_at":quiz.created_at
+            })
+        return quiz_list
+        
+    except SQLAlchemyError:
+        raise HTTPException(status_code=500, detail="Database error")
+    finally:
+        session.close()

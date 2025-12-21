@@ -5,7 +5,6 @@ from datetime import time, datetime
 # Request Schemas
 class CreateQuizRequest(BaseModel):
     lesson_id: int
-    student_id: int
     num_questions: int
     question_type: str  # "mcq" or "short"
     title: Optional[str] = None
@@ -13,7 +12,6 @@ class CreateQuizRequest(BaseModel):
 class SubmitAnswerRequest(BaseModel):
     quiz_id: int
     question_id: int
-    student_id: int
     # For MCQ
     selected_option: Optional[int] = None
     # For Short Answer
@@ -21,7 +19,6 @@ class SubmitAnswerRequest(BaseModel):
 
 class FinishQuizRequest(BaseModel):
     quiz_id: int
-    student_id: int
 
 # Response Schemas
 class MCQOptionResponse(BaseModel):
@@ -92,3 +89,9 @@ class QuizProgressResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class ResponseQuizList(BaseModel):
+    quiz_id:int
+    score:int |Optional[None]
+    title:str
+    created_at:datetime

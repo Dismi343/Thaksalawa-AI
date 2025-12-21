@@ -6,7 +6,8 @@ from app.controllers.quiz_controller import (
     get_quiz_progress,
     finish_quiz,
     get_quiz_results,
-    get_student_quiz_history
+    get_student_quiz_history,
+    get_quize_by_student
 )
 
 def safe_create_quiz(lesson_id: int, student_id: int, num_questions: int, question_type: str, title: str = None):
@@ -60,6 +61,14 @@ def safe_get_quiz_results(quiz_id: int, student_id: int):
 def safe_get_student_quiz_history(student_id: int):
     try:
         return get_student_quiz_history(student_id)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, f"Unexpected error: {str(e)}")
+
+def safe_get_quize_by_student(student_id: int):
+    try:
+        return get_quize_by_student(student_id)
     except HTTPException:
         raise
     except Exception as e:

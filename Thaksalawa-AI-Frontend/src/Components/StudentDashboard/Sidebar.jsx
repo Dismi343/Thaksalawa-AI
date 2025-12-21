@@ -5,15 +5,15 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { GetChats, DeleteChat,GetAllMessagesByChat } from "../../Api/ChatAPi";
+import { GetQuize } from "../../Api/QuizApi";
 
 // 1. Mock Data for History (In a real app, fetch this from an API)
 const HISTORY_DATA = {
   chat: [
-    { id:1, firstMessage:"Select a subject to display chat history"}
+   
   ],
   quiz: [
-    { id: 1, title: "Organic Chemistry", score: "85%" },
-    { id: 2, title: "World History", score: "92%" },
+    { id: 1, title: "Organic Chemistry", score: "85%" }
   ],
   code: [
     { id: 1, title: "Python Sort Algo", lang: "py" },
@@ -22,11 +22,12 @@ const HISTORY_DATA = {
   ]
 };
 
-const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen, selectedSubject, setSelectedSubject,subjects }) => {
+const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen, selectedSubject, setSelectedSubject,  setQuizState }) => {
 
   const[historyData,setHistoryData]=React.useState(HISTORY_DATA);
 
 
+  
   const fetchChatHistory = async(token,key,selectedSubject)=>{
       try{
         const subject_id=selectedSubject.sub_id;
@@ -39,7 +40,7 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen, select
           console.log("First message for chat", chat_id, ":", firstMessage,":",selectedSubject);
           // Add firstMessage as a property to the chat object
           return { ...chat, firstMessage: firstMessage ? firstMessage.query : null };
-          })
+          })  
         );
         setHistoryData(prev=>({
           ...prev,
@@ -53,17 +54,38 @@ const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen, select
       }
   }
 
+
+   // Helper functions to update quizState
+  const updateQuizState = (key, value) => {
+    setQuizState(prev => ({ ...prev, [key]: value }));
+  };
+
+  
+  const fetchQuizeHistory = async(token,key)=>{
+    
+    try{
+      const res=await GetQuize(token);
+      console.log(res.data);
+      setHistoryData(prev=>({
+        ...prev,
+        [key]:res.data
+      }))
+    }catch(e){
+      console.log(e);
+    }
+  }
+
 useEffect(()=>{
   const token=localStorage.getItem("token");
   let key=null;
-
   if (activePage === 'chat') {
         key="chat";
         fetchChatHistory(token,key,selectedSubject)
         console.log("fetch chat history");
       } else if (activePage === 'quiz') {
         key="quiz";
-       return;//add nesseccary fetchdata method
+        fetchQuizeHistory(token,key);
+       return;
       } else if (activePage === 'code') {
         key="code";
        return;//add nesseccary fetchdata method
@@ -113,6 +135,45 @@ useEffect(()=>{
     alert("Failed to delete chat.");
   }
 };
+
+  // const updateQuizState = (key, value) => {
+  //   setQuizState(prev => ({ ...prev, [key]: value }));
+  // };
+
+    // reset quizState
+  const resetQuizState = () => {
+  setQuizState({
+    selectedSubject: null,
+    selectedlesson: null,
+    quizeFrom: null,
+    quizeType: null,
+    quizeTime: null,
+    questionCount: 0
+  });
+};
+
+const onRefreshStatusBar=()=>{
+  if(activePage==="chat"){
+  historyData["chat"].length=0;
+  setHistoryData(prev=>({
+    ...prev,
+    ["chat"]:[]
+  }))
+
+  }
+
+
+  if(activePage==="quiz"){
+    historyData["quiz"].length=0;
+  setHistoryData(prev=>({
+    ...prev,
+    ["quiz"]:[]
+  }))
+  }
+  resetQuizState();
+  setSelectedSubject(null);
+
+}
   
   // Helper to determine if we are in a "History Mode" page
   const isHistoryPage = ['chat', 'quiz', 'code'].includes(activePage);
@@ -144,7 +205,9 @@ useEffect(()=>{
       <div className="space-y-4 animate-in fade-in slide-in-from-right-5 duration-300">
         {/* Back Button */}
         <button 
-          onClick={() => onNavigate('dashboard')}
+          onClick={() => {onNavigate('dashboard');
+                onRefreshStatusBar();
+          }}
           className="flex items-center gap-2 text-slate-500 hover:text-[#1a4d2e] transition-colors px-2 mb-4"
         >
           <ArrowLeft size={16} />
@@ -159,7 +222,9 @@ useEffect(()=>{
         </div>
 
         <button className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-green-200 text-[#1a4d2e] hover:bg-green-50 transition-all mb-4"
-        onClick={() => setSelectedSubject(null)}
+        onClick={() => {setSelectedSubject(null);
+          onRefreshStatusBar();
+        }}
         >
           <Plus size={18} />
           <span className="font-medium text-sm">{labels[activePage]?.new}</span>
@@ -169,32 +234,56 @@ useEffect(()=>{
         <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-300px)] pr-1 custom-scrollbar">
           {historyItems.map((item) => (
             <div
-                key={item.id || item.chat_id}
+                key={item.id || item.chat_id || item.quiz_id}
                 className="flex items-center w-full group"
               >
                 <button
                   className="flex flex-col items-start gap-1 flex-1 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-[#1a4d2e] transition-all text-left"
                   onClick={() => {
-                    const subject = subjects.find(s => s.sub_id === item.subject_id);
+                    if(activePage==="chat"){
+                    const subject = { sub_id: item.subject_id };
                     setSelectedSubject(subject);
                     onNavigate('chat', item.chat_id);
+                    }
+                    else if(activePage==="quiz"){
+                    updateQuizState('quizId', item.quiz_id);
+                    onNavigate('quiz', item.quiz_id);
+                    }
                   }}
                 >
-                  <span className="font-medium text-sm truncate w-full">{item?.firstMessage || "No topic"}</span>
+                  <span className="font-medium text-sm truncate w-full">{item?.firstMessage || item?.title ||"No topic"}</span>
                   <span className="text-xs text-slate-400 group-hover:text-green-600/70">
-                    {item?.date || item?.score || item?.lang || item?.timestamp || 'No additional info'}
+                    {item?.date
+                      ? new Date(item.date).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })
+                      : item?.timestamp
+                      ? new Date(item.timestamp).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })
+                      : item?.created_at
+                      ? new Date(item.created_at).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })
+                      : item?.score || item?.lang || "No additional info"}
                   </span>
+
                 </button>
-                <button
-                  className="ml-2 p-2 rounded hover:bg-red-100 text-red-500"
-                  title="Delete chat"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    await handleDeleteChat(item.chat_id, selectedSubject?.sub_id);
-                  }}
-                >
-                  <Trash2 size={18} />
-                </button>
+                {activePage === 'chat' && (
+                  <button
+                    className="ml-2 p-2 rounded hover:bg-red-100 text-red-500"
+                    title="Delete chat"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      await handleDeleteChat(item.chat_id, selectedSubject?.sub_id);
+                    }}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
             </div>
           ))}
           
