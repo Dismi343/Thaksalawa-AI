@@ -22,7 +22,7 @@ const HISTORY_DATA = {
   ]
 };
 
-const Sidebar = ({ activePage, onNavigate, isMobileOpen, setIsMobileOpen, selectedSubject, setSelectedSubject,  setQuizState }) => {
+const Sidebar = ({ activePage,  onNavigate, isMobileOpen, setIsMobileOpen, selectedSubject, setSelectedSubject,  setQuizState }) => {
 
   const[historyData,setHistoryData]=React.useState(HISTORY_DATA);
 
@@ -223,7 +223,7 @@ const onRefreshStatusBar=()=>{
 
         <button className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-green-200 text-[#1a4d2e] hover:bg-green-50 transition-all mb-4"
         onClick={() => {setSelectedSubject(null);
-          onRefreshStatusBar();
+          resetQuizState();
         }}
         >
           <Plus size={18} />
@@ -248,6 +248,7 @@ const onRefreshStatusBar=()=>{
                     else if(activePage==="quiz"){
                     updateQuizState('quizId', item.quiz_id);
                     onNavigate('quiz', item.quiz_id);
+                   
                     }
                   }}
                 >
