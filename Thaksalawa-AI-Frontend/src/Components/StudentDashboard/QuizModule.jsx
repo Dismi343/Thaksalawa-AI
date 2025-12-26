@@ -372,9 +372,7 @@ export default function QuizModule({activePage,setActivePage,quizState,setQuizSt
               <p className="text-lg text-slate-600">
                 You have not completed the quiz <span className="font-semibold">{incompletedQuizName}</span>
               </p>
-              <p className="text-sm text-slate-500">
-                Please complete the quiz first to view your results.
-              </p>
+              
               <button 
                 onClick={() => {
                   setQuizState({
@@ -781,7 +779,7 @@ export default function QuizModule({activePage,setActivePage,quizState,setQuizSt
           </div>
 
           {/* Right Side: Questions */}
-          <div className="p-8 md:w-2/3 flex flex-col">
+      <div className="p-8 md:w-2/3 flex flex-col max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <span className="text-slate-400 text-sm font-bold">Question {currentQuestionIndex + 1} of {totalQuestions}</span>
               <div className="flex gap-1">
