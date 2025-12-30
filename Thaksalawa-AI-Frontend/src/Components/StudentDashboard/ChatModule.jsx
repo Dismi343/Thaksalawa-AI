@@ -58,7 +58,7 @@ const ChatModule = ({ chatId,setChatId, selectedSubject, setSelectedSubject }) =
   const endRef = useRef(null);
   const [subjects,setSubjects] = useState([]);
   const [ loading, setLoading] = useState(false);
-  
+    
 
 
   const loadMessages = async (chat_id) => {
@@ -124,6 +124,7 @@ const ChatModule = ({ chatId,setChatId, selectedSubject, setSelectedSubject }) =
   // Add user message to messages array and userMessage state
   setMessages(prev => [...prev, { query: userInput }]);
 
+  console.log("source",selectedSubject.file_name);
   try {
     const token = localStorage.getItem('token');
     setLoading(true);
@@ -174,6 +175,7 @@ const ChatModule = ({ chatId,setChatId, selectedSubject, setSelectedSubject }) =
  
   const startChat = async(subject,sub_id)=>{
     setSelectedSubject(subject);
+    console.log("selected subject",subject);
     const token = localStorage.getItem('token');
     const res=await CreateChat(token, sub_id);
      if (res.data && res.data.chat_id) {

@@ -6,6 +6,7 @@ import {
 import axios from "axios";
 import { GetChats, DeleteChat,GetAllMessagesByChat } from "../../Api/ChatAPi";
 import { GetQuize } from "../../Api/QuizApi";
+import { GetSubjectById } from "../../Api/SubjectApi";
 
 // 1. Mock Data for History (In a real app, fetch this from an API)
 const HISTORY_DATA = {
@@ -241,9 +242,26 @@ const onRefreshStatusBar=()=>{
                   className="flex flex-col items-start gap-1 flex-1 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-[#1a4d2e] transition-all text-left"
                   onClick={() => {
                     if(activePage==="chat"){
-                    const subject = { sub_id: item.subject_id };
-                    setSelectedSubject(subject);
-                    onNavigate('chat', item.chat_id);
+                        // Fetch subject details by ID
+                        const fetchAndSetSubject = async () => {
+                          try {
+                            const token = localStorage.getItem("token");
+                            const response = await GetSubjectById(token, item.subject_id);
+                            const subjectData = {
+                              sub_id: item.subject_id,
+                              ...response.data  // Include all subject details
+                            };
+                            setSelectedSubject(subjectData);
+                            
+                            console.log("Selected subject:", subjectData);
+                          } catch(e) {
+                            console.error("Failed to fetch subject:", e);
+                            // Fallback: set just the ID if fetch fails
+                            setSelectedSubject({ sub_id: item.subject_id });
+                          }
+                        };
+                        fetchAndSetSubject();
+                        onNavigate('chat', item.chat_id);
                     }
                     else if(activePage==="quiz"){
                     updateQuizState('quizId', item.quiz_id);
