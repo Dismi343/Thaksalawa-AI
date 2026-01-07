@@ -13,7 +13,8 @@ from app.views.login_logs_views import router as login_logs_router
 from app.views.quiz_view import router as quiz_router
 from app.views.chat_view import router as chat_router
 from app.views.message_view import router as message_router
-
+from app.views.lesson_key_points_view import router as lesson_key_points_router
+from app.views.flash_card_view import router as flash_card_router
 app = FastAPI()
 
 app.add_middleware(
@@ -39,7 +40,9 @@ routers=[
     login_logs_router,
     quiz_router,
     chat_router,
-    message_router
+    message_router,
+    lesson_key_points_router,
+    flash_card_router
 ]
 
 for r in routers:

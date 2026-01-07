@@ -63,24 +63,38 @@ def get_all_subjects():
         session.close()
 
 
-def get_subject_by_id(subject_id:int):
+def get_subject_by_id(subject_id: int):
     session = SessionLocal()
     try:
-        subject = session.query(SubjectModel).filter_by(subject_id=subject_id).first()
+        subject = session.query( 
+            SubjectModel.sub_id,
+            SubjectModel.name,
+            SubjectModel.pdf_pdf_id,
+            PdfModel.file_name
+        ).outerjoin(PdfModel, SubjectModel.pdf_pdf_id == PdfModel.pdf_id).filter(
+            SubjectModel.sub_id == subject_id
+        ).first()
+        
         if not subject:
             raise HTTPException(status_code=404, detail="Subject not found")
-        return subject
+        
+        return {
+            "sub_id": subject.sub_id,
+            "name": subject.name,
+            "pdf_pdf_id": subject.pdf_pdf_id,
+            "file_name": subject.file_name
+        }
     except HTTPException:
         raise
     except SQLAlchemyError as e:
-        raise HTTPException(status_code=500, detail=f"Database error:  {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
         session.close()
 
 def delete_subject(Subject_id:int):
     session=SessionLocal()
     try:
-        subject=session.query(SubjectModel).filter_by(subject_id=Subject_id).first()
+        subject=session.query(SubjectModel).filter_by(sub_id=Subject_id).first()
         if not subject:
             raise HTTPException(status_code=404, detail="Subject not found")
         session.delete(subject)

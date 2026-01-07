@@ -11,3 +11,11 @@ export const GetSubjects = async (token)=>{
     })
 }
 
+export const GetSubjectById = async (token, subject_id) => {
+    return await axios.get(`${API_BASE_URL}/subjects/get/${subject_id}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        }
+    })
+}

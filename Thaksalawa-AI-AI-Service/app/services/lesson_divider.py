@@ -65,7 +65,8 @@ RULES:
 1. Identify natural lesson breaks by headings, topics, or concepts.
 2. Number lessons sequentially starting from 1.
 3. Each lesson MUST have the following keys: "lesson_number", "name", and "content".
-4. OUTPUT: Return a single JSON object with a key named "lessons" containing the final array of lesson objects.
+4. Use the exact lesson titles from the text when possible.
+5. OUTPUT: Return a single JSON object with a key named "lessons" containing the final array of lesson objects.
 """
 
     user_prompt = f"""

@@ -15,10 +15,10 @@ def create_subject_endpoint(payload: SubjectSchema):
 def get_all_subjects_endpoint():
     return safe_get_all_subjects()
 
-@router.get('/get/{subject_id}')
-def get_subject_by_id_endpoint(subject_id: int):
-    return safe_get_subject_by_id(subject_id)
+@router.get('/get/{sub_id}')
+def get_subject_by_id_endpoint(sub_id: int):
+    return safe_get_subject_by_id(sub_id)
 
-@router.delete('/delete-subject/{subject_id}')
-def delete_subject_endpoint(subject_id: int):
-    return safe_delete_subject(subject_id)
+@router.delete('/delete-subject/{sub_id}')
+def delete_subject_endpoint(sub_id: int):
+    return safe_delete_subject(sub_id)

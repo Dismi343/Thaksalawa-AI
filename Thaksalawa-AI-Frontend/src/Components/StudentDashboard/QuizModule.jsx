@@ -205,7 +205,7 @@ export default function QuizModule({activePage,setActivePage,quizState,setQuizSt
       answerData.append('quiz_id',quizId);
       answerData.append('question_id',quizQuestionData.questions[currentQuestionIndex].question_id);
         if (quizState.quizeType === 'mcq') {
-        answerData.append('selected_option', (selectedAnswers[currentQuestionIndex] || 0));
+        answerData.append('selected_option', (selectedAnswers[currentQuestionIndex]));
         answerData.append('written_answer', '');
       } else if (quizState.quizeType === 'short') {
         answerData.append('selected_option', 0); // Not applicable for short answer
