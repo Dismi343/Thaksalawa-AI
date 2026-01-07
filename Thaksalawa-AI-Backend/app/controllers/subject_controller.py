@@ -94,7 +94,7 @@ def get_subject_by_id(subject_id: int):
 def delete_subject(Subject_id:int):
     session=SessionLocal()
     try:
-        subject=session.query(SubjectModel).filter_by(subject_id=Subject_id).first()
+        subject=session.query(SubjectModel).filter_by(sub_id=Subject_id).first()
         if not subject:
             raise HTTPException(status_code=404, detail="Subject not found")
         session.delete(subject)

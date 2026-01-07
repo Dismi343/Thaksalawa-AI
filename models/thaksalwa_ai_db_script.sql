@@ -5,11 +5,9 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
--- Schema mydb
--- -----------------------------------------------------
--- -----------------------------------------------------
 -- Schema thaksalawa-ai-db
 -- -----------------------------------------------------
+DROP SCHEMA IF EXISTS `thaksalawa-ai-db` ;
 
 -- -----------------------------------------------------
 -- Schema thaksalawa-ai-db
@@ -175,6 +173,7 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`lesson` (
   `name` VARCHAR(100) NOT NULL,
   `lesson_number` INT NOT NULL,
   `content` LONGTEXT NOT NULL,
+  `brief_summary` MEDIUMTEXT NOT NULL,
   `Subject_sub_id` INT NOT NULL,
   PRIMARY KEY (`lesson_id`, `Subject_sub_id`),
   INDEX `fk_Lesson_Subject1_idx` (`Subject_sub_id` ASC) VISIBLE,
@@ -356,6 +355,56 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`student_answer` (
     ON DELETE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`flash_card`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`flash_card` (
+  `card_id` INT NOT NULL AUTO_INCREMENT,
+  `question` MEDIUMTEXT NOT NULL,
+  `answer` MEDIUMTEXT NOT NULL,
+  `difficulty` ENUM("easy", "medium", "hard") NOT NULL,
+  `lesson_lesson_id` INT NOT NULL,
+  `teacher_teacher_id` INT NULL,
+  `student_student_id` INT NULL,
+  PRIMARY KEY (`card_id`, `lesson_lesson_id`),
+  INDEX `fk_flash_card_lesson1_idx` (`lesson_lesson_id` ASC) VISIBLE,
+  INDEX `fk_flash_card_teacher1_idx` (`teacher_teacher_id` ASC) VISIBLE,
+  INDEX `fk_flash_card_student1_idx` (`student_student_id` ASC) VISIBLE,
+  CONSTRAINT `fk_flash_card_lesson1`
+    FOREIGN KEY (`lesson_lesson_id`)
+    REFERENCES `thaksalawa-ai-db`.`lesson` (`lesson_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_flash_card_teacher1`
+    FOREIGN KEY (`teacher_teacher_id`)
+    REFERENCES `thaksalawa-ai-db`.`teacher` (`teacher_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_flash_card_student1`
+    FOREIGN KEY (`student_student_id`)
+    REFERENCES `thaksalawa-ai-db`.`student` (`student_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`lesson_key_points`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`lesson_key_points` (
+  `point_id` INT NOT NULL AUTO_INCREMENT,
+  `key_point` MEDIUMTEXT NOT NULL,
+  `lesson_lesson_id` INT NOT NULL,
+  PRIMARY KEY (`point_id`),
+  INDEX `fk_lesson_key_points_lesson1_idx` (`lesson_lesson_id` ASC) VISIBLE,
+  CONSTRAINT `fk_lesson_key_points_lesson1`
+    FOREIGN KEY (`lesson_lesson_id`)
+    REFERENCES `thaksalawa-ai-db`.`lesson` (`lesson_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

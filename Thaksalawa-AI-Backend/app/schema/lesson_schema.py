@@ -22,6 +22,7 @@ class LessonResponseSchema(BaseModel):
     lesson_number: int
     name: str
     content: str
+    brief_summary :str
     Subject_sub_id: int
     
     class Config:

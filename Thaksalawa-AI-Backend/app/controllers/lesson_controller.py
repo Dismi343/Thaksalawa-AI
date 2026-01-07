@@ -6,6 +6,8 @@ from app.models.subject_model import SubjectModel
 from typing import List, Dict
 import requests
 import os
+from app.models.lesson_key_points_model import LessonKeyPointsModel
+
 
 AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://localhost:8001") #if not using nginx reverse proxy use this value
 
@@ -25,10 +27,29 @@ def create_lesson(payload):
             lesson_number=data.get("lesson_number"),
             name=data.get("name"),
             content=data.get("content"),
+            brief_summary=data.get("summary", {}).get("brief_summary") if isinstance(data.get("summary"), dict) else data.get("brief_summary"),
             Subject_sub_id=subject_id
         )
         
         session.add(lesson)
+        session.flush()  # Flush to get the lesson_id before adding key points
+        
+        # Extract and add key points from nested summary object or directly
+        key_points = []
+        if isinstance(data.get("summary"), dict):
+            key_points = data["summary"].get("key_points", [])
+        else:
+            key_points = data.get("key_points", [])
+        
+        # Add each key point to the database
+        if key_points:
+            for point in key_points:
+                key_point_record = LessonKeyPointsModel(
+                    lesson_lesson_id=lesson.lesson_id,
+                    key_point=str(point).strip()
+                )
+                session.add(key_point_record)
+        
         session.commit()
         session.refresh(lesson)
         return lesson
@@ -53,13 +74,40 @@ def create_multiple_lessons(lessons_data: List[Dict], subject_id: int):
         
         created_lessons = []
         for lesson_data in lessons_data:
+            # Extract brief_summary from nested summary object or directly
+            brief_summary = None
+            if isinstance(lesson_data.get("summary"), dict):
+                brief_summary = lesson_data["summary"].get("brief_summary")
+            else:
+                brief_summary = lesson_data.get("brief_summary")
+            
+            # Create lesson
             lesson = LessonModel(
                 lesson_number=lesson_data.get("lesson_number"),
                 name=lesson_data.get("name"),
                 content=lesson_data.get("content"),
+                brief_summary=brief_summary,
                 Subject_sub_id=subject_id
             )
             session.add(lesson)
+            session.flush()  # Flush to get the lesson_id
+            
+            # Extract and add key points from nested summary object or directly
+            key_points = []
+            if isinstance(lesson_data.get("summary"), dict):
+                key_points = lesson_data["summary"].get("key_points", [])
+            else:
+                key_points = lesson_data.get("key_points", [])
+            
+            # Add each key point to the database
+            if key_points:
+                for point in key_points:
+                    key_point_record = LessonKeyPointsModel(
+                        lesson_lesson_id=lesson.lesson_id,
+                        key_point=str(point).strip()
+                    )
+                    session.add(key_point_record)
+            
             created_lessons.append(lesson)
         
         session.commit()
@@ -179,7 +227,7 @@ def process_and_store_lessons(pdf_filename: str, subject_id: int, lesson_count: 
     try:
         # Call AI service to divide lessons
         ai_response = requests.post(
-            f"http://localhost:8080/ai/lessons/divide-lessons",      #if you are not using nginx reverse proxy change the url to AI_SERVICE_URL
+            f"http://localhost:8080/ai/lessons/divide-lessons-with-notes-and-summary",      #if you are not using nginx reverse proxy change the url to AI_SERVICE_URL
             json={
                 "pdf_filename": pdf_filename,
                 "lesson_count": lesson_count
