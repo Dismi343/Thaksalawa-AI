@@ -1,23 +1,15 @@
 import { 
-  LayoutGrid, 
+  Layers, 
   MessageSquareText, 
   GraduationCap, 
   PieChart, 
   Code, 
-  Settings, 
-  LogOut, 
-  Search,
-  Bell,
+
   Clock,
   ArrowRight,
-  MoreVertical,
-  Send,
-  Circle,
-  Play,
-  Leaf,
+
   ChevronRight,
-  Menu,
-  X,
+
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -142,6 +134,14 @@ export default function HomeModule({ onNavigate }){
           icon={MessageSquareText} 
           color="bg-emerald-500" 
           pageId="chat"
+        />
+        {/* Added Flashcards Widget */}
+        <ActionCard 
+          title="Flashcards" 
+          desc="Review subject decks."
+          icon={Layers} 
+          color="bg-pink-500" 
+          pageId="flashcards"
         />
         <ActionCard 
           title="Daily Quiz" 

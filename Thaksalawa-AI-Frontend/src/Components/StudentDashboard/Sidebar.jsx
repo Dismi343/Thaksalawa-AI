@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { 
   LayoutGrid, MessageSquareText, GraduationCap, PieChart, 
-  Code, Settings, LogOut, X, ArrowLeft, Plus, History ,Trash2
+  Code, Settings, LogOut, X, ArrowLeft, Plus, Layers,History ,Trash2
 } from "lucide-react";
 import axios from "axios";
 import { GetChats, DeleteChat,GetAllMessagesByChat } from "../../Api/ChatAPi";
@@ -185,6 +185,7 @@ const onRefreshStatusBar=()=>{
       <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 px-3">Menu</div>
       <NavItem icon={LayoutGrid} label="Dashboard" pageId="dashboard" />
       <NavItem icon={MessageSquareText} label="AI Chat" pageId="chat" />
+      <NavItem icon={Layers} label="Flashcards" pageId="flashcards" /> {/* Added */}
       <NavItem icon={GraduationCap} label="Quizzes" pageId="quiz" />
       <NavItem icon={Code} label="Code Studio" pageId="code" />
       <NavItem icon={PieChart} label="Analytics" pageId="analytics" />

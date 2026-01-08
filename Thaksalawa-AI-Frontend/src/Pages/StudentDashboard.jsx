@@ -4,6 +4,7 @@ import HomeModule from '../Components/StudentDashboard/HomeModule.jsx';
 import QuizPage from "./QuizPage.jsx";
 import QuizModule from '../Components/StudentDashboard/QuizModule.jsx';
 import ChatModule from '../Components/StudentDashboard/ChatModule.jsx';
+import FlashcardModule from '../Components/StudentDashboard/FlashCardModule.jsx';
 import {
   LayoutGrid,
   MessageSquareText,
@@ -82,6 +83,7 @@ const [quizState, setQuizState] = useState({
       case 'code': return <CodeModule />;
       case 'analytics': return <div className="p-8 text-center text-slate-500">Analytics Component Here</div>;
       default: return <HomeModule onNavigate={setActivePage} />;
+      case 'flashcards': return <FlashcardModule />;
     }
   };
 
