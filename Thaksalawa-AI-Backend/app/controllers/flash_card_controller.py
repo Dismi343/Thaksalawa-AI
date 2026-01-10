@@ -7,11 +7,13 @@ from app.schema.flash_card_schema import FlashCardResponseSchema, Difficulty
 from typing import List, Dict
 import requests
 import os
+from datetime import datetime,timezone
+
 
 AI_SERVICE_URL = os.getenv("AI_SERVICE_URL")
 
 
-def create_flashcard(payload: Dict) -> FlashCardModel:
+def create_flashcard_by_teacher(payload: Dict, teacher_id:int) -> FlashCardModel:
     """Create a single flashcard"""
     session = SessionLocal()
     try:
@@ -31,8 +33,9 @@ def create_flashcard(payload: Dict) -> FlashCardModel:
             question=data.get("question"),
             answer=data.get("answer"),
             difficulty=difficulty,
+            created_at=datetime.now(timezone.utc),
             lesson_id=lesson_id,
-            teacher_id=data.get("teacher_id"),
+            teacher_id=teacher_id,
             student_id=data.get("student_id")
         )
         
@@ -50,6 +53,45 @@ def create_flashcard(payload: Dict) -> FlashCardModel:
     finally:
         session.close()
 
+def create_flashcard_by_student(payload: Dict,student_id:int) -> FlashCardModel:
+    """Create a single flashcard"""
+    session = SessionLocal()
+    try:
+        data = payload if isinstance(payload, dict) else payload.__dict__
+        
+        # Validate lesson exists
+        lesson_id = data.get("lesson_id")
+        if not session.query(LessonModel).filter_by(lesson_id=lesson_id).first():
+            raise HTTPException(status_code=404, detail="Lesson not found")
+        
+        # Validate difficulty level
+        difficulty = data.get("difficulty", "medium").lower()
+        if difficulty not in ["easy", "medium", "hard"]:
+            raise HTTPException(status_code=400, detail="Invalid difficulty level")
+        
+        flashcard = FlashCardModel(
+            question=data.get("question"),
+            answer=data.get("answer"),
+            difficulty=difficulty,
+            created_at=datetime.now(timezone.utc),
+            lesson_id=lesson_id,
+            teacher_id=data.get("teacher_id"),
+            student_id=student_id
+        )
+        
+        session.add(flashcard)
+        session.commit()
+        session.refresh(flashcard)
+        return flashcard
+        
+    except HTTPException:
+        session.rollback()
+        raise
+    except SQLAlchemyError as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        session.close()
 
 def create_multiple_flashcards(flashcards_data: List[Dict], lesson_id: int) -> List[FlashCardModel]:
     """Create multiple flashcards at once"""
@@ -70,6 +112,7 @@ def create_multiple_flashcards(flashcards_data: List[Dict], lesson_id: int) -> L
                 question=card_data.get("question"),
                 answer=card_data.get("answer"),
                 difficulty=difficulty,
+                created_at=datetime.now(timezone.utc),
                 lesson_id=lesson_id,
                 teacher_id=card_data.get("teacher_id"),
                 student_id=card_data.get("student_id")
@@ -105,12 +148,32 @@ def get_all_flashcards():
     finally:
         session.close()
 
+def get_all_flashcards_student(student_id:int):
+    """Get all flashcards"""
+    session = SessionLocal()
+    try:
+        return session.query(FlashCardModel).filter_by(student_student_id=student_id).all()
+    except SQLAlchemyError:
+        raise HTTPException(status_code=500, detail="Database error")
+    finally:
+        session.close()
+
+def get_all_flashcards_teacher(teacher_id:int):
+    """Get all flashcards"""
+    session = SessionLocal()
+    try:
+        return session.query(FlashCardModel).filter_by(teacher_teacher_id=teacher_id).all()
+    except SQLAlchemyError:
+        raise HTTPException(status_code=500, detail="Database error")
+    finally:
+        session.close()
+
 
 def get_flashcards_by_lesson(lesson_id: int):
     """Get all flashcards for a specific lesson"""
     session = SessionLocal()
     try:
-        flashcards = session.query(FlashCardModel).filter_by(lesson_id=lesson_id).all()
+        flashcards = session.query(FlashCardModel).filter_by(lesson_lesson_id=lesson_id).all()
         return flashcards
     except SQLAlchemyError:
         raise HTTPException(status_code=500, detail="Database error")
@@ -224,6 +287,7 @@ def generate_and_store_flashcards_for_subject(subject_id: int):
                             answer=card.get("answer", ""),
                             difficulty=difficulty,
                             lesson_lesson_id=lesson_id,
+                            created_at=datetime.now(timezone.utc),
                             teacher_teacher_id=card.get("teacher_teacher_id"),
                             student_student_id=card.get("student_student_id")
                         )
@@ -258,7 +322,7 @@ def generate_and_store_flashcards_for_subject(subject_id: int):
         raise HTTPException(status_code=500, detail=f"Error generating flashcards: {str(e)}")
 
 
-def generate_and_store_flashcards_for_lesson(lesson_id: int):
+def generate_and_store_flashcards_for_lesson(lesson_id: int,    teacher_id:int):
     """
     Generate flashcards from AI service for a single lesson and store in database.
     
@@ -313,8 +377,9 @@ def generate_and_store_flashcards_for_lesson(lesson_id: int):
                         question=card.get("question", ""),
                         answer=card.get("answer", ""),
                         difficulty=difficulty,
+                        created_at=datetime.now(timezone.utc),
                         lesson_lesson_id=lesson_id,
-                        teacher_teacher_id=card.get("teacher_teacher_id"),
+                        teacher_teacher_id=teacher_id,
                         student_student_id=card.get("student_student_id")
                     )
                     session.add(flashcard_model)
@@ -351,3 +416,63 @@ def generate_and_store_flashcards_for_lesson(lesson_id: int):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating flashcards: {str(e)}")
+    
+
+
+def update_flashcard(card_id: int, payload: Dict) -> FlashCardModel:
+    """Update a specific flashcard"""
+    session = SessionLocal()
+    try:
+        # Get the flashcard
+        flashcard = session.query(FlashCardModel).filter_by(card_id=card_id).first()
+        if not flashcard:
+            raise HTTPException(status_code=404, detail="Flashcard not found")
+        
+        data = payload if isinstance(payload, dict) else payload.__dict__
+        
+        # Validate lesson exists if lesson_id is being updated
+        if "lesson_id" in data:
+            lesson_id = data.get("lesson_id")
+            if not session.query(LessonModel).filter_by(lesson_id=lesson_id).first():
+                raise HTTPException(status_code=404, detail="Lesson not found")
+            flashcard.lesson_id = lesson_id
+        
+        # Update question if provided
+        if "question" in data and data.get("question"):
+            flashcard.question = data.get("question")
+        
+        # Update answer if provided
+        if "answer" in data and data.get("answer"):
+            flashcard.answer = data.get("answer")
+        
+        # Update difficulty if provided
+        if "difficulty" in data:
+            difficulty = data.get("difficulty", "medium").lower()
+            if difficulty not in ["easy", "medium", "hard"]:
+                raise HTTPException(status_code=400, detail="Invalid difficulty level")
+            flashcard.difficulty = difficulty
+        
+        # Update teacher_id if provided
+        if "teacher_id" in data:
+            flashcard.teacher_id = data.get("teacher_id")
+        
+        # Update student_id if provided
+        if "student_id" in data:
+            flashcard.student_id = data.get("student_id")
+        
+        session.commit()
+        session.refresh(flashcard)
+        
+        return flashcard
+        
+    except HTTPException:
+        session.rollback()
+        raise
+    except SQLAlchemyError as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        session.close()
+
+
+# 

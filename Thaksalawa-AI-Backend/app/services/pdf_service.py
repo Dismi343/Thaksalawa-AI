@@ -1,9 +1,9 @@
 from fastapi import HTTPException
 from app.controllers.pdf_controller import upload_pdf, get_pdf_by_id, delete_pdf, download_pdf,get_all_pdfs
 
-async def safe_upload_pdf(file, db):
+async def safe_upload_pdf(file, db,teacher_id:int):
     try:
-        return await upload_pdf(file=file, db=db)
+        return await upload_pdf(file=file, db=db, teacher_id=teacher_id)
     except HTTPException:
         raise 
     except Exception as e:
