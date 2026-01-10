@@ -14,7 +14,7 @@ load_dotenv()
 AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "http://localhost:8080")
 
 
-async def upload_pdf(file:UploadFile = File(...),db:Session=Depends(get_db)):
+async def upload_pdf(file:UploadFile = File(...),db:Session=Depends(get_db),teacher_id:int=None):
     if file.content_type not in ["application/pdf"]:
         raise HTTPException(status_code=400, detail="Invalid file type. Only PDF files are allowed.")
     
@@ -22,6 +22,7 @@ async def upload_pdf(file:UploadFile = File(...),db:Session=Depends(get_db)):
     pdf  = PdfModel(
         file_name=file.filename,
         file_data=file_bytes,
+        teacher_teacher_id=teacher_id,
         uploaded_at=datetime.now(timezone.utc)
     ) 
     async with httpx.AsyncClient() as client:

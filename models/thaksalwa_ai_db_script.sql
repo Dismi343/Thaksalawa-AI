@@ -45,24 +45,6 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
--- Table `thaksalawa-ai-db`.`teacher`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`teacher` (
-  `teacher_id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(255) NOT NULL,
-  `email` VARCHAR(100) NOT NULL,
-  `password` VARCHAR(255) NOT NULL,
-  `user_role_role_id` INT NOT NULL,
-  PRIMARY KEY (`teacher_id`, `user_role_role_id`),
-  INDEX `fk_teacher_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
-  CONSTRAINT `fk_teacher_user_role1`
-    FOREIGN KEY (`user_role_role_id`)
-    REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
 -- Table `thaksalawa-ai-db`.`student`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`student` (
@@ -70,14 +52,9 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`student` (
   `st_name` VARCHAR(255) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
   `email` VARCHAR(100) NOT NULL,
-  `teacher_teacher_id` INT NULL DEFAULT NULL,
   `user_role_role_id` INT NOT NULL,
   PRIMARY KEY (`student_id`, `user_role_role_id`),
-  INDEX `fk_Student_teacher1_idx` (`teacher_teacher_id` ASC) VISIBLE,
   INDEX `fk_Student_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
-  CONSTRAINT `fk_Student_teacher1`
-    FOREIGN KEY (`teacher_teacher_id`)
-    REFERENCES `thaksalawa-ai-db`.`teacher` (`teacher_id`),
   CONSTRAINT `fk_Student_user_role1`
     FOREIGN KEY (`user_role_role_id`)
     REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`))
@@ -114,6 +91,24 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`teacher`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`teacher` (
+  `teacher_id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `password` VARCHAR(255) NOT NULL,
+  `user_role_role_id` INT NOT NULL,
+  PRIMARY KEY (`teacher_id`, `user_role_role_id`),
+  INDEX `fk_teacher_user_role1_idx` (`user_role_role_id` ASC) VISIBLE,
+  CONSTRAINT `fk_teacher_user_role1`
+    FOREIGN KEY (`user_role_role_id`)
+    REFERENCES `thaksalawa-ai-db`.`user_role` (`role_id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
 -- Table `thaksalawa-ai-db`.`pdf`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`pdf` (
@@ -121,7 +116,14 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`pdf` (
   `file_name` VARCHAR(255) NOT NULL,
   `file_data` LONGBLOB NOT NULL,
   `uploaded_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`pdf_id`))
+  `teacher_teacher_id` INT NOT NULL,
+  PRIMARY KEY (`pdf_id`, `teacher_teacher_id`),
+  INDEX `fk_pdf_teacher1_idx` (`teacher_teacher_id` ASC) VISIBLE,
+  CONSTRAINT `fk_pdf_teacher1`
+    FOREIGN KEY (`teacher_teacher_id`)
+    REFERENCES `thaksalawa-ai-db`.`teacher` (`teacher_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -365,6 +367,7 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`flash_card` (
   `question` MEDIUMTEXT NOT NULL,
   `answer` MEDIUMTEXT NOT NULL,
   `difficulty` ENUM("easy", "medium", "hard") NOT NULL,
+  `created_at` DATETIME NOT NULL,
   `lesson_lesson_id` INT NOT NULL,
   `teacher_teacher_id` INT NULL,
   `student_student_id` INT NULL,
@@ -397,7 +400,7 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`lesson_key_points` (
   `point_id` INT NOT NULL AUTO_INCREMENT,
   `key_point` MEDIUMTEXT NOT NULL,
   `lesson_lesson_id` INT NOT NULL,
-  PRIMARY KEY (`point_id`),
+  PRIMARY KEY (`point_id`, `lesson_lesson_id`),
   INDEX `fk_lesson_key_points_lesson1_idx` (`lesson_lesson_id` ASC) VISIBLE,
   CONSTRAINT `fk_lesson_key_points_lesson1`
     FOREIGN KEY (`lesson_lesson_id`)
@@ -405,6 +408,29 @@ CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`lesson_key_points` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `thaksalawa-ai-db`.`teacher_has_student`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `thaksalawa-ai-db`.`teacher_has_student` (
+  `teacher_teacher_id` INT NOT NULL,
+  `student_student_id` INT NOT NULL,
+  PRIMARY KEY (`teacher_teacher_id`, `student_student_id`),
+  INDEX `fk_teacher_has_student_student1_idx` (`student_student_id` ASC) VISIBLE,
+  INDEX `fk_teacher_has_student_teacher1_idx` (`teacher_teacher_id` ASC) VISIBLE,
+  CONSTRAINT `fk_teacher_has_student_teacher1`
+    FOREIGN KEY (`teacher_teacher_id`)
+    REFERENCES `thaksalawa-ai-db`.`teacher` (`teacher_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_teacher_has_student_student1`
+    FOREIGN KEY (`student_student_id`)
+    REFERENCES `thaksalawa-ai-db`.`student` (`student_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
